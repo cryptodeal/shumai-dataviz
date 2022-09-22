@@ -35,7 +35,12 @@
 
 	const format_x_label = (x: number) => {
 		const date = new Date(x);
-		return `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
+		const hours = date.getHours();
+		const minutes = date.getMinutes();
+		const seconds = date.getSeconds();
+		return `${hours === 0 ? 12 : hours}:${
+			minutes.toString().length > 1 ? minutes : `0${minutes}`
+		}:${seconds.toString().length > 1 ? seconds : `0${seconds}`}`;
 	};
 
 	//$: console.log(data)
