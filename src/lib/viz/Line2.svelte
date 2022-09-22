@@ -3,7 +3,7 @@
 	export let data: Record<string, { x: number; y: number; label?: string }[]> = {};
 	export let format_x_label: (x: any) => string;
 	export let colors: string[] = [];
-	$: console.log(data);
+	// $: console.log(data);
 	let closest: { x: number; y: number; label?: string };
 	let x1 = Infinity;
 	let x2 = -Infinity;
