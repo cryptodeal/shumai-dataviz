@@ -1,0 +1,306 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body {
+	background-color: hsl(var(--b1));
+}
+
+:root {
+	--tw-border-opacity: 1;
+	--date-picker-background: hsl(var(--b1));
+	--date-picker-foreground: hsl(var(--bc));
+	--date-input-width: 100%;
+	--date-picker-highlight-border: hsl(var(--p) / var(--tw-border-opacity));
+}
+/* 
+  Using my toast implementation submitted for
+  addition to the DaisyUI library while Pull Request
+  remains pending
+*/
+.toast {
+	@apply relative flex max-w-[250px] break-words flex-row w-auto bg-base-200 text-sm py-3 pl-3 pr-2 rounded-box items-center justify-between gap-4;
+}
+
+.toast-info {
+	@apply bg-info text-info-content;
+}
+
+.toast-success {
+	@apply bg-success text-success-content;
+}
+
+.toast-warning {
+	@apply bg-warning text-warning-content;
+}
+
+.toast-error {
+	@apply bg-error text-error-content;
+}
+
+.toast-sm {
+	@apply p-2 mb-2;
+}
+
+.toast-control-top-right {
+	@apply top-1 right-1;
+}
+
+.toast-control-top-left {
+	@apply top-1 left-1;
+}
+
+.toast-control {
+	@apply fixed flex flex-col space-y-2 md:space-y-4 max-w-[400px];
+}
+
+.date-time-field > input {
+	@apply px-1 h-[3rem] input-bordered input-primary;
+}
+
+/* slightly transparent fallback for Firefox (not supporting backdrop-filter) */
+@supports not ((-webkit-backdrop-filter: none) or (backdrop-filter: none)) {
+	.backdrop-filter {
+		@apply bg-white/60 dark:bg-dark-900/60;
+	}
+}
+
+.glassmorphicCard {
+	@apply rounded-lg bg-light-200/70  dark:bg-dark-900/70;
+}
+
+/* if backdrop support: very transparent and blurred */
+@supports ((-webkit-backdrop-filter: none) or (backdrop-filter: none)) {
+	.glassmorphicCard {
+		@apply rounded-lg bg-gray-500/40 backdrop-filter backdrop-blur-xl dark:bg-dark-700/40 dark:backdrop-blur-2xl;
+	}
+}
+
+@media (min-width: 768px) {
+	.listContainer {
+		height: calc(100vh - 8rem);
+		display: flex;
+		flex-direction: column;
+	}
+}
+
+.listContainer {
+	height: calc(100vh - 10.5rem);
+	display: flex;
+	flex-direction: column;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+	@apply leading-tight font-light;
+}
+
+h1 {
+	@apply text-5xl;
+}
+
+h2 {
+	@apply text-4xl;
+}
+
+h3 {
+	@apply text-3xl;
+}
+
+h4 {
+	@apply text-2xl;
+}
+
+h5 {
+	@apply text-xl;
+}
+
+h6 {
+	@apply text-base;
+}
+
+.appContent {
+	@apply w-full pt-12 md:pt-14;
+}
+
+.glassmorphicBg {
+	@apply bg-gray-300/60 dark:bg-gray-300/70;
+}
+
+@supports ((-webkit-backdrop-filter: none) or (backdrop-filter: none)) {
+	.glassmorphicBg {
+		@apply bg-gray-500/10 backdrop-filter backdrop-blur-md dark:bg-white/10;
+	}
+}
+
+div.multiselect {
+	@apply form-field;
+}
+
+div.multiselect > ul.options {
+	@apply max-h-20 bg-base-100;
+}
+
+div.multiselect > ul.selected {
+	@apply h-full overflow-scroll text-base;
+}
+
+.form-field {
+	@apply input input-bordered input-primary w-full max-w-xs;
+}
+
+@supports (-webkit-touch-callout: none) {
+	.form-field {
+		@apply text-base;
+	}
+}
+
+.form-error {
+	@apply text-error text-center text-sm;
+}
+
+.progress-container {
+	display: flex;
+	justify-content: space-between;
+	position: relative;
+	margin-bottom: 30px;
+	max-width: 100%;
+	width: 350px;
+}
+
+.progress-container::before {
+	content: '';
+	background-color: #e0e0e0;
+	position: absolute;
+	top: 50%;
+	left: 0;
+	transform: translateY(-50%);
+	height: 4px;
+	width: 100%;
+	z-index: -1;
+}
+
+.progress {
+	background-color: #3498db;
+	position: absolute;
+	top: 50%;
+	left: 0;
+	transform: translateY(-50%);
+	height: 4px;
+	width: 0%;
+	z-index: -1;
+	transition: 0.4s ease;
+}
+
+.circle {
+	background-color: #fff;
+	color: #999;
+	border-radius: 50%;
+	height: 30px;
+	width: 30px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border: 3px solid #e0e0e0;
+	transition: 0.4s ease;
+	cursor: pointer;
+}
+
+.circle::after {
+	content: attr(data-title) ' ';
+	position: absolute;
+	bottom: 35px;
+	color: #999;
+	transition: 0.4s ease;
+}
+
+.circle.active::after {
+	color: #3498db;
+}
+
+.circle.active {
+	border-color: #3498db;
+}
+
+.invalid,
+.bar {
+	border: 1px solid red;
+}
+
+.valid,
+.foo {
+	border: 1px solid green;
+}
+
+.dirty {
+	border: 1px dashed black;
+}
+
+.list {
+	flex-grow: 1;
+}
+
+.list .virtual-list-wrapper {
+	overflow-y: scroll;
+	overflow-x: hidden;
+	white-space: nowrap;
+}
+
+.basicContainer {
+	height: 100%;
+	width: 100%;
+}
+
+.wave {
+	width: 5px;
+	height: 30%;
+	background: linear-gradient(45deg, black, red);
+	margin: 10px;
+	animation: wave 1s linear infinite;
+	border-radius: 20px;
+}
+
+.wave:nth-child(2) {
+	animation-delay: 0.1s;
+}
+.wave:nth-child(3) {
+	animation-delay: 0.2s;
+}
+.wave:nth-child(4) {
+	animation-delay: 0.3s;
+}
+.wave:nth-child(5) {
+	animation-delay: 0.4s;
+}
+.wave:nth-child(6) {
+	animation-delay: 0.5s;
+}
+.wave:nth-child(7) {
+	animation-delay: 0.6s;
+}
+.wave:nth-child(8) {
+	animation-delay: 0.7s;
+}
+.wave:nth-child(9) {
+	animation-delay: 0.8s;
+}
+.wave:nth-child(10) {
+	animation-delay: 0.9s;
+}
+
+@keyframes wave {
+	0% {
+		transform: scale(0);
+	}
+	50% {
+		transform: scale(1);
+	}
+	100% {
+		transform: scale(0);
+	}
+}
