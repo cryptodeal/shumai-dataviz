@@ -35,7 +35,10 @@ const fetchStats = () => {
 			if (!res.ok) throw new Error(`Error: !res.ok; ${res.status}`);
 			return res.json();
 		})
-		.then((stats) => parseStats(stats));
+		.then((stats) => {
+			// console.log(stats)
+			return parseStats(stats);
+		});
 };
 
 const parseRouteStats = (stats: ModelStats, model_name?: string) => {

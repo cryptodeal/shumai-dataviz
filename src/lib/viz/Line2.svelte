@@ -3,7 +3,7 @@
 	export let data: Record<string, { x: number; y: number; label?: string }[]> = {};
 	export let format_x_label: (x: any) => string;
 	export let colors: string[] = [];
-	// $: console.log(data);
+	$: console.log(data);
 	let closest: { x: number; y: number; label?: string };
 	let x1 = Infinity;
 	let x2 = -Infinity;
@@ -26,7 +26,7 @@
 	<Pancake.Chart {x1} {x2} {y1} {y2}>
 		<Pancake.Grid horizontal count={4} let:value let:first>
 			<div class="grid-line horizontal">
-				<span>{value} hits</span>
+				<span>{value} req/s</span>
 			</div>
 		</Pancake.Grid>
 
@@ -55,7 +55,7 @@
 				>
 					<strong class="text-secondary-content">{closest.label}</strong>
 					<span class="text-sm text-secondary-content">@ {format_x_label(closest.x)}</span>
-					<strong class="text-secondary-content">Hits: </strong>
+					<strong class="text-secondary-content">Req/Sec: </strong>
 					<span class="text-secondary-content"> {closest.y}</span>
 				</div>
 			</Pancake.Point>
