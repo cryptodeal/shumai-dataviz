@@ -3,46 +3,74 @@
 	import { get_color } from '$lib/utils';
 	import Line from '$lib/viz/Line.svelte';
 	import Line2 from '$lib/viz/Line2.svelte';
+	import Line3 from '$lib/viz/Line3.svelte';
 
 	let parsed_stats: Record<string, { x: number; y: number; label?: string }[]> = {};
 	let req_per_sec: Record<string, { x: number; y: number; label?: string }[]> = {};
+	let bytes_data: Record<string, { x: number; y: number; label?: string }[]> = {};
 
 	$: labels = Object.keys(parsed_stats);
+	$: bytes_labels = Object.keys(bytes_data);
 	$: $ioStats?.map((stat, i) => {
 		if (i === 0) parsed_stats = {};
 		if (i === 0) req_per_sec = {};
-		const keys = Object.keys(stat.data);
-		const key_count = keys.length;
+		if (i === 0) bytes_data = {};
+		const route_keys = Object.keys(stat.route_stats);
+		const key_count = route_keys.length;
+
 		for (let j = 0; j < key_count; j++) {
-			if (!parsed_stats[keys[j]]) {
-				parsed_stats[keys[j]] = [
+			if (!parsed_stats[route_keys[j]]) {
+				parsed_stats[route_keys[j]] = [
 					{
 						x: stat.timestamp,
-						y: stat.data[keys[j]].hits,
-						label: keys[j]
+						y: stat.route_stats[route_keys[j]].hits,
+						label: route_keys[j]
 					}
 				];
 			} else {
-				parsed_stats[keys[j]].push({
+				parsed_stats[route_keys[j]].push({
 					x: stat.timestamp,
-					y: stat.data[keys[j]].hits,
-					label: keys[j]
+					y: stat.route_stats[route_keys[j]].hits,
+					label: route_keys[j]
 				});
 			}
-			if (!req_per_sec[keys[j]]) {
-				req_per_sec[keys[j]] = [
+			if (!req_per_sec[route_keys[j]]) {
+				req_per_sec[route_keys[j]] = [
 					{
 						x: stat.timestamp,
-						y: stat.data[keys[j]].hits / stat.data[keys[j]].seconds,
-						label: keys[j]
+						y: stat.route_stats[route_keys[j]].hits / stat.route_stats[route_keys[j]].seconds,
+						label: route_keys[j]
 					}
 				];
 			} else {
-				req_per_sec[keys[j]].push({
+				req_per_sec[route_keys[j]].push({
 					x: stat.timestamp,
-					y: stat.data[keys[j]].hits / stat.data[keys[j]].seconds,
-					label: keys[j]
+					y: stat.route_stats[route_keys[j]].hits / stat.route_stats[route_keys[j]].seconds,
+					label: route_keys[j]
 				});
+			}
+		}
+		const bytes_keys = Object.keys(stat.bytes_used);
+		const byte_key_count = bytes_keys.length;
+		for (let j = 0; j < byte_key_count; j++) {
+			if (!bytes_data[bytes_keys[j]]) {
+				const bytes = Number(BigInt(stat.bytes_used[bytes_keys[j]]));
+				if (bytes)
+					bytes_data[bytes_keys[j]] = [
+						{
+							x: stat.timestamp,
+							y: Number(stat.bytes_used[bytes_keys[j]]),
+							label: bytes_keys[j]
+						}
+					];
+			} else {
+				const bytes = Number(BigInt(stat.bytes_used[bytes_keys[j]]));
+				if (bytes)
+					bytes_data[bytes_keys[j]].push({
+						x: stat.timestamp,
+						y: Number(stat.bytes_used[bytes_keys[j]]),
+						label: bytes_keys[j]
+					});
 			}
 		}
 	});
@@ -74,8 +102,9 @@
 			<div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
 				<div class="flex flex-col items-center">
 					{#each labels as label, i}
+						{@const color = colors[i]}
 						<div class="flex items-center gap-2">
-							<div class="w-4 h-4 chart_key" style:--bg_color={colors[i]} />
+							<div class="w-4 h-4 chart_key" style:--bg_color={color} />
 							<span>{label}</span>
 						</div>
 					{/each}
@@ -88,8 +117,9 @@
 			<div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
 				<div class="flex flex-col items-center">
 					{#each labels as label, i}
+						{@const color = colors[i]}
 						<div class="flex items-center gap-2">
-							<div class="w-4 h-4 chart_key" style:--bg_color={colors[i]} />
+							<div class="w-4 h-4 chart_key" style:--bg_color={color} />
 							<span>{label}</span>
 						</div>
 					{/each}
@@ -97,6 +127,21 @@
 				<div class="flex flex-col sm:container">
 					<h2>Avg. Req/Sec By Route (By Model) Statistics</h2>
 					<Line2 data={req_per_sec} {colors} {format_x_label} />
+				</div>
+			</div>
+			<div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
+				<div class="flex flex-col items-center">
+					{#each bytes_labels as label, i}
+						{@const color = colors[i]}
+						<div class="flex items-center gap-2">
+							<div class="w-4 h-4 chart_key" style:--bg_color={color} />
+							<span>{label}</span>
+						</div>
+					{/each}
+				</div>
+				<div class="flex flex-col sm:container">
+					<h2>Bytes Used (By Model)</h2>
+					<Line3 data={bytes_data} {colors} {format_x_label} />
 				</div>
 			</div>
 		</div>
