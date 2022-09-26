@@ -6,6 +6,10 @@ html,
 body {
 	background-color: hsl(var(--b1));
 }
+.annotation strong {
+	display: block;
+	font-size: 20px;
+}
 
 :root {
 	--tw-border-opacity: 1;

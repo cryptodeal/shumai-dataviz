@@ -7,9 +7,6 @@
 	> = {};
 	export let format_x_label: (x: any) => string;
 	export let format_y_label: (y: any) => string;
-	export let format_tooltip: (
-		closest: { x: number; y: number; label?: string } & Record<string, string | number>
-	) => string;
 
 	let closest: { x: number; y: number; label?: string } & Record<string, string | number>,
 		x1 = Infinity,
@@ -78,7 +75,7 @@
 								: 'locTop'}"
 							style="transform: translate(-{100 * ((closest.x - x1) / (x2 - x1))}%,0);"
 						>
-							{@html format_tooltip(closest)}
+							<slot name="tooltip" {closest} />
 						</div>
 					</Pancake.Point>
 				{/if}
@@ -106,13 +103,12 @@
 		display: block;
 	}
 	.grid-line.horizontal {
-		width: calc(100% + 2em);
-		left: -2em;
+		width: 100%;
 		border-bottom: 1px dashed #ccc;
 	}
 	.grid-line span {
 		position: absolute;
-		left: -4.5em;
+		left: -5em;
 		bottom: -11px;
 		font-family: sans-serif;
 		font-size: 14px;
@@ -155,9 +151,5 @@
 		background-color: #ff3e00;
 		border-radius: 50%;
 		transform: translate(-50%, -50%);
-	}
-	.annotation strong {
-		display: block;
-		font-size: 20px;
 	}
 </style>

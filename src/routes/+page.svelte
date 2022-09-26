@@ -78,63 +78,39 @@
 	const format_y_label_bytes = (y: number) => {
 		return `${formatter.format(y)} bytes`;
 	};
-
-	const format_tooltip_hits = (
-		closest: { x: number; y: number; label?: string } & Record<string, number | string>
-	) => {
-		return `<strong class="text-secondary-content">${closest.label}</strong>
-					<span class="text-sm text-secondary-content">@ ${format_x_label(closest.x)}</span>
-					<strong class="text-secondary-content">Hits: </strong>
-					<span class="text-secondary-content">${closest.y}</span>`;
-	};
-
-	const format_tooltip_avg_req_time = (
-		closest: { x: number; y: number; label?: string } & Record<string, number | string>
-	) => {
-		return `<strong class="text-secondary-content">${closest.label}</strong>
-					<span class="text-sm text-secondary-content">@ ${format_x_label(closest.x)}</span>
-					<strong class="text-secondary-content">Req/Sec: </strong>
-					<span class="text-secondary-content">${closest.y}</span>`;
-	};
-
-	const format_tooltip_bytes = (
-		closest: { x: number; y: number; label?: string } & Record<string, number | string>
-	) => {
-		return `<strong class="text-secondary-content">${closest.label}</strong>
-					<span class="text-sm text-secondary-content">@ ${format_x_label(closest.x)}</span>
-					<strong class="text-secondary-content">Mem Usg: </strong>
-					<span class="text-secondary-content">${closest.y} bytes</span>`;
-	};
 </script>
 
 <div class="flex flex-col gap-10">
 	<h1 class="text-center">Shumai Distributed Training Analytics</h1>
 	<div class="items-center justify-center grid grid-cols-1 md:grid-cols-2 gap-10">
-		<Line
-			{format_x_label}
-			format_y_label={format_y_label_hits}
-			data={parsed_stats}
-			format_tooltip={format_tooltip_hits}
-		>
+		<Line {format_x_label} format_y_label={format_y_label_hits} data={parsed_stats}>
 			<h2 slot="title">Route Statistics</h2>
+			<svelte:fragment slot="tooltip" let:closest>
+				<strong class="text-secondary-content">${closest.label}</strong>
+				<span class="text-sm text-secondary-content">@ ${format_x_label(closest.x)}</span>
+				<strong class="text-secondary-content">Hits: </strong>
+				<span class="text-secondary-content">${closest.y}</span>
+			</svelte:fragment>
 		</Line>
 
-		<Line
-			{format_x_label}
-			format_y_label={format_y_label_avg_req_time}
-			data={req_per_sec}
-			format_tooltip={format_tooltip_avg_req_time}
-		>
+		<Line {format_x_label} format_y_label={format_y_label_avg_req_time} data={req_per_sec}>
 			<h2 slot="title">Avg. Req/Sec By Route</h2>
+			<svelte:fragment slot="tooltip" let:closest>
+				<strong class="text-secondary-content">${closest.label}</strong>
+				<span class="text-sm text-secondary-content">@ ${format_x_label(closest.x)}</span>
+				<strong class="text-secondary-content">Req/Sec: </strong>
+				<span class="text-secondary-content">${closest.y}</span>
+			</svelte:fragment>
 		</Line>
 
-		<Line
-			{format_x_label}
-			format_y_label={format_y_label_bytes}
-			data={bytes_data}
-			format_tooltip={format_tooltip_bytes}
-		>
+		<Line {format_x_label} format_y_label={format_y_label_bytes} data={bytes_data}>
 			<h2 slot="title">Memory Usage (Bytes)</h2>
+			<svelte:fragment slot="tooltip" let:closest>
+				<strong class="text-secondary-content">${closest.label}</strong>
+				<span class="text-sm text-secondary-content">@ ${format_x_label(closest.x)}</span>
+				<strong class="text-secondary-content">Mem Usg: </strong>
+				<span class="text-secondary-content">${closest.y} bytes</span>
+			</svelte:fragment>
 		</Line>
 	</div>
 </div>
