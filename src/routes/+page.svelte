@@ -2,10 +2,28 @@
 	import { ioStats, tree_map_data } from '$lib/stores/distributed/stats';
 	import Line from '$lib/viz/Line.svelte';
 	import TreeMap from '$lib/viz/tree/TreeMap.svelte';
+	import type { TreeMapDatum } from '$lib/viz/tree/types';
 
 	let parsed_stats: Record<string, { x: number; y: number; label?: string }[]> = {};
 	let req_per_sec: Record<string, { x: number; y: number; label?: string }[]> = {};
 	let bytes_data: Record<string, { x: number; y: number; label?: string }[]> = {};
+
+	let clear: any,
+		used_tree_data: TreeMapDatum,
+		has_tree_data = false,
+		// TODO: allow changing interval w range slider input
+		interval = 5000;
+
+	$: if (!has_tree_data && $tree_map_data.children.length) {
+		has_tree_data = true;
+		used_tree_data = $tree_map_data;
+	}
+
+	const updateTreeData = () => (used_tree_data = $tree_map_data);
+	$: {
+		clearInterval(clear);
+		clear = setInterval(updateTreeData, interval);
+	}
 
 	$: $ioStats?.map((stat, i) => {
 		if (i === 0) parsed_stats = {};
@@ -114,6 +132,8 @@
 		</Line>
 	</div>
 </div>
-<TreeMap data={$tree_map_data}>
-	<h2 slot="title">Tensor Ops TreeMap</h2>
-</TreeMap>
+{#if used_tree_data}
+	<TreeMap data={used_tree_data}>
+		<h2 slot="title">Tensor Ops TreeMap</h2>
+	</TreeMap>
+{/if}
