@@ -8,3 +8,8 @@ export type TreeMapDatum = {
 	name: string;
 	children: TreeMapDatum[] | TreeMapLastChild[];
 };
+export interface Tree {
+	name: string;
+	value: number;
+	children?: Tree[];
+}

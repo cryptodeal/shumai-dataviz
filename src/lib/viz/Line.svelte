@@ -1,15 +1,26 @@
 <script lang="ts">
 	import * as Pancake from '@sveltejs/pancake';
-	export let data: Record<string, { x: number; y: number; label?: string }[]> = {};
+	import { genColors } from '$lib/utils';
+	export let data: Record<
+		string,
+		({ x: number; y: number; label?: string } & Record<string, string | number>)[]
+	> = {};
 	export let format_x_label: (x: any) => string;
-	export let colors: string[] = [];
-	// $: console.log(data);
-	let closest: { x: number; y: number; label?: string };
-	let x1 = Infinity;
-	let x2 = -Infinity;
-	let y1 = Infinity;
-	let y2 = -Infinity;
-	let all_data: { x: number; y: number; label?: string }[] = [];
+	export let format_y_label: (y: any) => string;
+	export let format_tooltip: (
+		closest: { x: number; y: number; label?: string } & Record<string, string | number>
+	) => string;
+
+	let closest: { x: number; y: number; label?: string } & Record<string, string | number>,
+		x1 = Infinity,
+		x2 = -Infinity,
+		y1 = Infinity,
+		y2 = -Infinity,
+		all_data: { x: number; y: number; label?: string }[] = [];
+
+	$: labels = Object.keys(data);
+
+	$: colors = genColors(Object.keys(data).length);
 	$: Object.values(data).forEach((d, i) => {
 		if (i === 0) all_data = [];
 		d.forEach((v) => {
@@ -22,47 +33,60 @@
 	});
 </script>
 
-<div class="chart">
-	<Pancake.Chart {x1} {x2} {y1} {y2}>
-		<Pancake.Grid horizontal count={4} let:value let:first>
-			<div class="grid-line horizontal">
-				<span>{value} hits</span>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 justify-center items-center">
+	<div class="grid grid-cols-1 gap-1 items-center">
+		{#each labels as label, i}
+			{@const color = colors[i]}
+			<div class="inline-flex items-center justify-center gap-2">
+				<div class="badge badge-sm colored_badge" style:--bg_color={color} />
+				<span>{label}</span>
 			</div>
-		</Pancake.Grid>
-
-		<Pancake.Grid vertical count={3} let:value>
-			<span class="x-label">{format_x_label(value)}</span>
-		</Pancake.Grid>
-
-		{#each Object.values(data) as datum, i}
-			{#if datum.length > 1}
-				<Pancake.Svg>
-					<Pancake.SvgLine data={datum} let:d>
-						<path class="data" style:--stroke_color={colors[i]} {d} />
-					</Pancake.SvgLine>
-				</Pancake.Svg>
-			{/if}
 		{/each}
+	</div>
+	<div class="flex flex-col sm:container">
+		<div class="text-center">
+			<slot name="title" />
+		</div>
+		<div class="chart">
+			<Pancake.Chart {x1} {x2} {y1} {y2}>
+				<Pancake.Grid horizontal count={4} let:value let:first>
+					<div class="grid-line horizontal">
+						<span>{format_y_label(value)}</span>
+					</div>
+				</Pancake.Grid>
 
-		{#if closest}
-			<Pancake.Point x={closest.x} y={closest.y}>
-				<span class="annotation-point" />
-				<div
-					class="annotation bg-secondary navButton {y2 - closest.y >= closest.y - y1
-						? 'locBottom'
-						: 'locTop'}"
-					style="transform: translate(-{100 * ((closest.x - x1) / (x2 - x1))}%,0);"
-				>
-					<strong class="text-secondary-content">{closest.label}</strong>
-					<span class="text-sm text-secondary-content">@ {format_x_label(closest.x)}</span>
-					<strong class="text-secondary-content">Hits: </strong>
-					<span class="text-secondary-content"> {closest.y}</span>
-				</div>
-			</Pancake.Point>
-		{/if}
+				<Pancake.Grid vertical count={3} let:value>
+					<span class="x-label">{format_x_label(value)}</span>
+				</Pancake.Grid>
 
-		<Pancake.Quadtree data={all_data} bind:closest />
-	</Pancake.Chart>
+				{#each Object.values(data) as datum, i}
+					{#if datum.length > 1}
+						<Pancake.Svg>
+							<Pancake.SvgLine data={datum} let:d>
+								<path class="data" style:--stroke_color={colors[i]} {d} />
+							</Pancake.SvgLine>
+						</Pancake.Svg>
+					{/if}
+				{/each}
+
+				{#if closest}
+					<Pancake.Point x={closest.x} y={closest.y}>
+						<span class="annotation-point" />
+						<div
+							class="annotation bg-secondary navButton {y2 - closest.y >= closest.y - y1
+								? 'locBottom'
+								: 'locTop'}"
+							style="transform: translate(-{100 * ((closest.x - x1) / (x2 - x1))}%,0);"
+						>
+							{@html format_tooltip(closest)}
+						</div>
+					</Pancake.Point>
+				{/if}
+
+				<Pancake.Quadtree data={all_data} bind:closest />
+			</Pancake.Chart>
+		</div>
+	</div>
 </div>
 
 <style>
@@ -71,6 +95,10 @@
 		padding: 1.5em 2.75em 3em 6em;
 		margin: 0 0 36px 0;
 		overflow: hidden;
+	}
+
+	.colored_badge {
+		background-color: var(--bg_color);
 	}
 
 	.grid-line {

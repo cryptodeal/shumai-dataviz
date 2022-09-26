@@ -1,13 +1,9 @@
 <script lang="ts">
 	import TreemapNode from './Node.svelte';
+	import type { HierarchyRectangularNode } from 'd3-hierarchy';
+	import type { Tree } from './types';
 
-	export let root: {
-		x0: number;
-		x1: number;
-		y0: number;
-		y1: number;
-		children: any[];
-	};
+	export let root: HierarchyRectangularNode<Tree>;
 </script>
 
 <pancake-treemap>

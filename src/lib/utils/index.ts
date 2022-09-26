@@ -8,3 +8,11 @@ export function get_color(i: number, saturation: number, lightness: number) {
 	}
 	return `hsl(${hue}, ${100 * saturation}%, ${100 * lightness}%)`;
 }
+
+export const genColors = (n: number) => {
+	const colors = [];
+	for (let i = 0; i < n; i++) {
+		colors.push(get_color(i, 0.9, 0.5));
+	}
+	return colors;
+};
