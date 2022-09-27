@@ -45,7 +45,7 @@
 			<slot name="title" />
 		</div>
 		<div class="chart">
-			<Pancake.Chart {x1} {x2} {y1} {y2}>
+			<Pancake.Chart {x1} {x2} {y1} y2={y2 === y1 ? y1 + 10 : y2}>
 				<Pancake.Grid horizontal count={4} let:value let:first>
 					<div class="grid-line horizontal">
 						<span>{format_y_label(value)}</span>

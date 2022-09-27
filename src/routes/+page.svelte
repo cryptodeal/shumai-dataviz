@@ -105,7 +105,7 @@
 			<h2 slot="title">Route Statistics</h2>
 			<svelte:fragment slot="tooltip" let:closest>
 				<strong class="text-secondary-content">{closest.label}</strong>
-				<span class="text-sm text-secondary-content">@ ${format_x_label(closest.x)}</span>
+				<span class="text-sm text-secondary-content">@ {format_x_label(closest.x)}</span>
 				<strong class="text-secondary-content">Hits: </strong>
 				<span class="text-secondary-content">{closest.y}</span>
 			</svelte:fragment>
@@ -114,7 +114,7 @@
 		<Line {format_x_label} format_y_label={format_y_label_avg_req_time} data={req_per_sec}>
 			<h2 slot="title">Avg. Req/Sec By Route</h2>
 			<svelte:fragment slot="tooltip" let:closest>
-				<strong class="text-secondary-content">${closest.label}</strong>
+				<strong class="text-secondary-content">{closest.label}</strong>
 				<span class="text-sm text-secondary-content">@ {format_x_label(closest.x)}</span>
 				<strong class="text-secondary-content">Req/Sec: </strong>
 				<span class="text-secondary-content">{closest.y}</span>
