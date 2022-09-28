@@ -5,13 +5,17 @@
 	import { themeChange } from 'theme-change';
 	import { onMount } from 'svelte';
 
-	let drawercontent: any;
+	let drawercontent: {
+		scrollTop: number;
+	};
 	let drawerContentScrollY = 0;
 	function parseContentScroll() {
 		drawerContentScrollY = drawercontent.scrollTop;
 	}
 
-	let drawersidebar: any;
+	let drawersidebar: {
+		scrollTop: number;
+	};
 	let drawerSidebarScrollY = 0;
 	function parseSidebarScroll() {
 		drawerSidebarScrollY = drawersidebar.scrollTop;
@@ -20,7 +24,7 @@
 	onMount(() => {
 		themeChange(false);
 		parseContentScroll();
-		// parseSidebarScroll();
+		parseSidebarScroll();
 	});
 
 	afterNavigate(() => {

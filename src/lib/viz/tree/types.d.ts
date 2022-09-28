@@ -13,3 +13,5 @@ export interface Tree {
 	value: number;
 	children?: Tree[];
 }
+
+export type Timer = ReturnType<typeof setTimeout>;

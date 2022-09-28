@@ -5,7 +5,7 @@ export type BaseStats = Record<
 	string,
 	{ hits: number; seconds: number; op_stats?: Record<string, { time: number; bytes: bigint }> }
 >;
-type ModelStats = Record<string, any> & { statistics: BaseStats; bytes_used: bigint };
+type ModelStats = Record<string, unknown> & { statistics: BaseStats; bytes_used: bigint };
 export type DistTrainingStats = Record<string, ModelStats>;
 
 export type ParsedStats = {
@@ -48,7 +48,7 @@ export const tree_map_data = derived(treeMapDatum, ($treeMapDatum) => {
 	tree_map_data.subscribe((val) => {
 		if (val) treeMapData = val;
 	});
-	Object.entries($treeMapDatum).forEach((val, i) => {
+	Object.entries($treeMapDatum).forEach((val) => {
 		// console.log(val);
 		const [key, value] = val;
 		const key_split = key.split(' ');

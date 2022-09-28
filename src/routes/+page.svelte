@@ -2,13 +2,13 @@
 	import { ioStats, tree_map_data } from '$lib/stores/distributed/stats';
 	import Line from '$lib/viz/Line.svelte';
 	import TreeMap from '$lib/viz/tree/TreeMap.svelte';
-	import type { TreeMapDatum } from '$lib/viz/tree/types';
+	import type { Timer, TreeMapDatum } from '$lib/viz/tree/types';
 
 	let parsed_stats: Record<string, { x: number; y: number; label?: string }[]> = {};
 	let req_per_sec: Record<string, { x: number; y: number; label?: string }[]> = {};
 	let bytes_data: Record<string, { x: number; y: number; label?: string }[]> = {};
 
-	let clear: any,
+	let clear: Timer,
 		used_tree_data: TreeMapDatum,
 		has_tree_data = false,
 		// TODO: allow changing interval w range slider input
@@ -98,9 +98,9 @@
 	};
 </script>
 
-<div class="flex flex-col gap-10">
+<div class="flex flex-col justify-center gap-y-10 md:gap-y-32">
 	<h1 class="text-center">Shumai Distributed Training Analytics</h1>
-	<div class="items-center justify-center grid grid-cols-1 md:grid-cols-2 gap-10">
+	<div class="items-center md:mx-10 justify-center grid grid-cols-1 xl:grid-cols-2 gap-10">
 		<Line {format_x_label} format_y_label={format_y_label_hits} data={parsed_stats}>
 			<h2 slot="title">Route Statistics</h2>
 			<svelte:fragment slot="tooltip" let:closest>
@@ -131,9 +131,9 @@
 			</svelte:fragment>
 		</Line>
 	</div>
+	{#if used_tree_data}
+		<TreeMap data={used_tree_data}>
+			<h2 slot="title">Tensor Ops TreeMap</h2>
+		</TreeMap>
+	{/if}
 </div>
-{#if used_tree_data}
-	<TreeMap data={used_tree_data}>
-		<h2 slot="title">Tensor Ops TreeMap</h2>
-	</TreeMap>
-{/if}

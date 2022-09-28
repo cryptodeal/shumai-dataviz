@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { hierarchy as d3_hierarchy, treemap as d3_treemap } from 'd3-hierarchy';
 	import * as Pancake from '@sveltejs/pancake';
+	import ChartWrapper from '$lib/ux/ChartWrapper.svelte';
 	import Map from '$lib/viz/tree/Map.svelte';
 	import type { HierarchyNode, HierarchyRectangularNode } from 'd3-hierarchy';
 	import { fade } from 'svelte/transition';
@@ -10,15 +11,16 @@
 	export let data: TreeMapDatum;
 
 	const breadcrumbs = (node: HierarchyNode<Tree>) => {
-		const crumbs = [];
+		const crumbs: string[] = [];
 		let tempNode: null | HierarchyNode<Tree> = node;
 		while (tempNode) {
 			crumbs.unshift(tempNode.data.name);
 			tempNode = tempNode.parent;
 		}
-
-		return crumbs.join(' / ');
+		return crumbs;
 	};
+
+	$: crumbs = breadcrumbs(selected);
 
 	const extents = tweened<{ x1: number; x2: number; y1: number; y2: number }>(undefined, {
 		duration: 500,
@@ -91,47 +93,44 @@
 </script>
 
 <div class="sm:container sm:mx-auto">
-	<div class="text-center my-10">
-		<slot name="title" />
-	</div>
-	<button class="tree_breadcrumbs" disabled={!selected?.parent} on:click={handle_breadcrumbs}>
-		{breadcrumbs(selected)}
-	</button>
-
-	<div class="chart">
-		<Pancake.Chart x1={$extents.x1} x2={$extents.x2} y1={$extents.y1} y2={$extents.y2}>
-			<Map {root} let:node>
-				{#if is_visible(node, selected)}
-					<div
-						transition:fade={{ duration: 350 }}
-						class="node"
-						class:leaf={!node.children}
-						on:click={() => select(node)}
-					>
-						<div class="tree_contents">
-							<strong>{node.data.name}</strong>
-							<span>Avg Exec. Time: {node.value.toFixed(4)}</span>
+	<ChartWrapper>
+		<div class="text-center my-10">
+			<slot name="title" />
+		</div>
+		<button
+			class="text-sm breadcrumbs tree_breadcrumbs"
+			disabled={!selected.parent}
+			on:click={handle_breadcrumbs}
+		>
+			<ul>
+				{#each crumbs as crumb}
+					<li>{crumb}</li>
+				{/each}
+			</ul>
+		</button>
+		<div class="chart">
+			<Pancake.Chart x1={$extents.x1} x2={$extents.x2} y1={$extents.y1} y2={$extents.y2}>
+				<Map {root} let:node>
+					{#if is_visible(node, selected)}
+						<div
+							transition:fade={{ duration: 350 }}
+							class="node"
+							class:leaf={!node.children}
+							on:click={() => select(node)}
+						>
+							<div class="tree_contents">
+								<strong>{node.data.name}</strong>
+								<span>Avg Exec. Time: {node.value.toFixed(4)}</span>
+							</div>
 						</div>
-					</div>
-				{/if}
-			</Map>
-		</Pancake.Chart>
-	</div>
+					{/if}
+				</Map>
+			</Pancake.Chart>
+		</div>
+	</ChartWrapper>
 </div>
 
 <style>
-	.tree_breadcrumbs {
-		width: 100%;
-		padding: 0.3rem 0.4rem;
-		background-color: transparent;
-		font-family: inherit;
-		font-size: inherit;
-		text-align: left;
-		border: none;
-		cursor: pointer;
-		outline: none;
-	}
-
 	.tree_breadcrumbs:disabled {
 		cursor: default;
 	}
