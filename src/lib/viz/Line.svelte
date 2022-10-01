@@ -15,9 +15,13 @@
 		x2 = -Infinity,
 		y1 = Infinity,
 		y2 = -Infinity,
-		all_data: { x: number; y: number; label?: string }[] = [];
+		all_data: { x: number; y: number; label?: string }[] = [],
+		labels: { label: string; enabled: boolean }[];
 
-	$: labels = Object.keys(data);
+	$: labels = Object.keys(data).map((label) => ({
+		label,
+		enabled: labels.find((x) => x.label === label)?.enabled ?? true
+	}));
 
 	$: colors = genColors(Object.keys(data).length);
 	$: Object.values(data).forEach((d, i) => {
@@ -37,9 +41,13 @@
 		<div
 			class="order-last lg:order-first lg:col-span-1 grid grid-cols-1 gap-y-1 justify-self-center items-center"
 		>
-			{#each labels as label, i}
+			{#each labels as { label }, i}
 				{@const color = colors[i]}
-				<div class="inline-flex items-center gap-2">
+				<div
+					class="inline-flex items-center gap-2"
+					class:disabled_label={!labels[i].enabled}
+					on:click={() => (labels[i].enabled = !labels[i].enabled)}
+				>
 					<div class="badge badge-sm colored_badge" style:--bg_color={color} />
 					<span>{label}</span>
 				</div>
@@ -62,16 +70,18 @@
 					</Pancake.Grid>
 
 					{#each Object.values(data) as datum, i}
-						{#if datum.length > 1}
+						{@const color = colors[i]}
+
+						{#if labels[i].enabled && datum.length > 1}
 							<Pancake.Svg>
 								<Pancake.SvgLine data={datum} let:d>
-									<path class="data" style:--stroke_color={colors[i]} {d} />
+									<path class="data" style:--stroke_color={color} {d} />
 								</Pancake.SvgLine>
 							</Pancake.Svg>
 						{/if}
 					{/each}
 
-					{#if closest}
+					{#if closest && labels.some((x) => x.label === closest.label && x.enabled)}
 						<Pancake.Point x={closest.x} y={closest.y}>
 							<span class="annotation-point" />
 							<div
@@ -118,6 +128,10 @@
 		bottom: -11px;
 		font-family: sans-serif;
 		font-size: 14px;
+	}
+
+	.disabled_label {
+		@apply opacity-30;
 	}
 
 	.x-label {

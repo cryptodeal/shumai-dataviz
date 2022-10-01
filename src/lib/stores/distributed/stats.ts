@@ -114,7 +114,7 @@ export const tree_map_data = derived(treeMapDatum, ($treeMapDatum) => {
 });
 
 const fetchStats = () => {
-	return fetch('http://localhost:3000/statistics')
+	return fetch('http://127.0.0.1:3000/statistics')
 		.then((res) => {
 			if (!res.ok) throw new Error(`Error: !res.ok; ${res.status}`);
 			return res.json();
