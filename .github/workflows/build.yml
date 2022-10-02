@@ -20,7 +20,7 @@ jobs:
                   node-version: 16
 
             - name: Build/release Electron app
-              uses: samuelmeuli/action-electron-builder@v1
+              uses: njzydark/action-electron-builder-pnpm@v1.1.0-pnpm
               with:
                   args: '--config build.config.json --publish always'
                   # GitHub token, automatically provided to the action
