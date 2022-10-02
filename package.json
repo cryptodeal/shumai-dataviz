@@ -15,9 +15,10 @@
 		"build": "cross-env NODE_ENV=production npm run build:svelte",
 		"build:svelte": "vite build",
 		"build:electron": "electron-builder -mwl --config build.config.json",
-		"build:release": "cross-env NODE_ENV=production npm run build:svelte && npm run release:electron",
+		"release": "cross-env NODE_ENV=production npm run build:svelte && npm run release:electron",
 		"release:electron": "electron-builder -mwl --config build.config.json --publish always",
 		"lint": "prettier --plugin-search-dir . --check . && eslint .",
+		"postinstall": "electron-builder install-app-deps",
 		"format": "prettier --plugin-search-dir . --write ."
 	},
 	"engines": {

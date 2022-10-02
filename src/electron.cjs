@@ -1,4 +1,5 @@
 const windowStateManager = require('electron-window-state');
+const autoUpdater = require('electron-updater');
 const contextMenu = require('electron-context-menu');
 const { app, BrowserWindow, ipcMain } = require('electron');
 const serve = require('electron-serve');
@@ -111,6 +112,9 @@ function createMainWindow() {
 }
 
 app.once('ready', createMainWindow);
+app.on('ready', () => {
+	autoUpdater.checkForUpdatesAndNotify();
+});
 app.on('activate', () => {
 	if (!mainWindow) {
 		createMainWindow();
