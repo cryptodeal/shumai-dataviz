@@ -13,7 +13,17 @@
 		}
 	],
 	"afterSign": "electron-builder-notarize",
+	"win": {
+		"target": {
+			"target": "nsis",
+			"arch": ["x64", "ia32"]
+		}
+	},
 	"mac": {
+		"target": {
+			"target": "default",
+			"arch": ["x64", "arm64"]
+		},
 		"category": "public.app-category.lifestyle",
 		"hardenedRuntime": true,
 		"entitlements": "./node_modules/electron-builder-notarize/entitlements.mac.inherit.plist"
