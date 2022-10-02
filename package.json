@@ -14,7 +14,7 @@
 		"dev:electron": "electron src/electron.cjs",
 		"build": "pnpm build:svelte",
 		"build:svelte": "vite build",
-		"build:electron": "electron-builder -mwl --config build.config.json",
+		"build:electron": "electron-builder --config build.config.json",
 		"release": "cross-env NODE_ENV=production pnpm build:svelte && pnpm release:electron",
 		"release:electron": "electron-builder -mwl --config build.config.json --publish always",
 		"lint": "prettier --plugin-search-dir . --check . && eslint .",
@@ -22,8 +22,8 @@
 		"format": "prettier --plugin-search-dir . --write ."
 	},
 	"engines": {
-		"npm": ">=7",
-		"pnpm": ">=7",
+		"npm": ">=6",
+		"pnpm": ">=6",
 		"yarn": "use npm - https://github.com/FractalHQ/sveltekit-electron/issues/12#issuecomment-1068399385"
 	},
 	"browserslist": [
