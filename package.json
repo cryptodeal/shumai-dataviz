@@ -12,18 +12,18 @@
 		"dev:all": "concurrently -n=svelte,electron -c='#ff3e00',blue \"npm run dev:svelte\" \"npm run dev:electron\"",
 		"dev:svelte": "vite dev",
 		"dev:electron": "electron src/electron.cjs",
-		"build": "npm run build:svelte",
+		"build": "cross-env NODE_ENV=production npm run build:svelte",
 		"build:svelte": "vite build",
-		"build:electron": "electron-builder --mwl --config build.config.json",
-		"release": "cross-env NODE_ENV=production npm run build:svelte && npm run electron-builder --wl --config build.config.json --publish always",
-		"release:mac": "cross-env NODE_ENV=production npm run build:svelte && npm run electron-builder --m --config build.config.json --publish always",
+		"build:electron": "electron-builder -mwl --config build.config.json",
+		"build:release": "cross-env NODE_ENV=production npm run build:svelte && npm run release:electron",
+		"release:electron": "electron-builder -mwl --config build.config.json --publish always",
 		"lint": "prettier --plugin-search-dir . --check . && eslint .",
 		"postinstall": "electron-builder install-app-deps",
 		"format": "prettier --plugin-search-dir . --write ."
 	},
 	"engines": {
-		"npm": ">=6",
-		"pnpm": ">=6",
+		"npm": ">=7",
+		"pnpm": ">=7",
 		"yarn": "use npm - https://github.com/FractalHQ/sveltekit-electron/issues/12#issuecomment-1068399385"
 	},
 	"browserslist": [
