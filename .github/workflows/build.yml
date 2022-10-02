@@ -9,6 +9,20 @@ jobs:
         strategy:
             matrix:
                 os: [macos-latest, ubuntu-latest, windows-latest]
+                flag: [--mac, --linux, --win]
+                exclude:
+                    - os: macos-latest
+                      flag: --linux
+                    - os: macos-latest
+                      flag: --win
+                    - os: windows-latest
+                      flag: --linux
+                    - os: windows-latest
+                      flag: --mac
+                    - os: ubuntu-latest
+                      flag: --win
+                    - os: ubuntu-latest
+                      flag: --mac
 
         steps:
             - name: Check out Git repository
@@ -30,7 +44,7 @@ jobs:
             - name: Build/release Electron app
               uses: njzydark/action-electron-builder-pnpm@v1.1.0-pnpm
               with:
-                  args: '--config build.config.json --publish onTagOrDraft'
+                  args: '--config build.config.json --publish onTagOrDraft ${{ matrix.flag }}'
                   # GitHub token, automatically provided to the action
                   # (No need to define this secret in the repo settings)
                   github_token: ${{ secrets.github_token }}
