@@ -17,24 +17,19 @@ cache:
         - '~/.pnpm-store'
         - $HOME/.cache/electron
         - $HOME/.cache/electron-builder
-before_install:
-    - curl -f https://get.pnpm.io/v6.16.js | node - add --global pnpm@7
-    - pnpm config set store-dir ~/.pnpm-store
-install:
-    - pnpm install
 
 script:
     - |
         if [ "$TRAVIS_OS_NAME" == "linux" ]; then
           docker run --rm \
-            --env-file <(env | grep -iE 'DEBUG|NODE_|ELECTRON_|YARN_|NPM_|PNPM_|CI|CIRCLE|TRAVIS|APPVEYOR_|CSC_|_TOKEN|_KEY|AWS_|STRIP|BUILD_') \
+            --env-file <(env | grep -iE 'DEBUG|NODE_|ELECTRON_|YARN_|NPM_|CI|CIRCLE|TRAVIS|APPVEYOR_|CSC_|_TOKEN|_KEY|AWS_|STRIP|BUILD_') \
             -v ${PWD}:/project \
             -v ~/.cache/electron:/root/.cache/electron \
             -v ~/.cache/electron-builder:/root/.cache/electron-builder \
             electronuserland/builder:wine \
-            /bin/bash -c "pnpm && pnpm release --linux --win"
+            /bin/bash -c "curl -f https://get.pnpm.io/v6.16.js && node - add --global pnpm@7 && pnpm install && pnpm release --linux --win"
         else
-          yarn release
+          curl -f https://get.pnpm.io/v6.16.js && node - add --global pnpm@7 && pnpm install && pnpm release --mac
         fi
 before_cache:
     - rm -rf $HOME/.cache/electron-builder/wine
