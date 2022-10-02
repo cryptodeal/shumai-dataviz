@@ -30,7 +30,7 @@ jobs:
             - name: Build/release Electron app
               uses: njzydark/action-electron-builder-pnpm@v1.1.0-pnpm
               with:
-                  args: '--config build.config.json'
+                  args: '--config build.config.json --publish onTagOrDraft'
                   # GitHub token, automatically provided to the action
                   # (No need to define this secret in the repo settings)
                   github_token: ${{ secrets.github_token }}
