@@ -85,10 +85,12 @@
 						<Pancake.Point x={closest.x} y={closest.y}>
 							<span class="annotation-point" />
 							<div
-								class="annotation bg-secondary navButton {y2 - closest.y >= closest.y - y1
+								class="annotation bg-secondary navButton {y2 - closest.y >=
+								closest.y - y1
 									? 'locBottom'
 									: 'locTop'}"
-								style="transform: translate(-{100 * ((closest.x - x1) / (x2 - x1))}%,0);"
+								style="transform: translate(-{100 *
+									((closest.x - x1) / (x2 - x1))}%,0);"
 							>
 								<slot name="tooltip" {closest} />
 							</div>

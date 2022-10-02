@@ -1,14 +1,20 @@
 <script lang="ts">
 	import '../app.css';
 	import { afterNavigate } from '$app/navigation';
+	import { ElectronEvent } from '$lib/types';
 	import Navbar from '$lib/ux/Navbar.svelte';
 	import { themeChange } from 'theme-change';
 	import { onMount } from 'svelte';
+	import { browser } from '$app/environment';
 
+	export const ssr = false;
 	let drawercontent: {
 		scrollTop: number;
+	} = {
+		scrollTop: 0
 	};
-	let drawerContentScrollY = 0;
+	let drawerContentScrollY = 0,
+		isMaximized = false;
 	function parseContentScroll() {
 		drawerContentScrollY = drawercontent.scrollTop;
 	}
@@ -16,12 +22,14 @@
 	let drawersidebar: {
 		scrollTop: number;
 	};
-	let drawerSidebarScrollY = 0;
+	let drawerSidebarScrollY = 0,
+		ready = false;
 	function parseSidebarScroll() {
 		drawerSidebarScrollY = drawersidebar.scrollTop;
 	}
 
 	onMount(() => {
+		ready = true;
 		themeChange(false);
 		parseContentScroll();
 		parseSidebarScroll();
@@ -30,36 +38,41 @@
 	afterNavigate(() => {
 		drawercontent.scrollTop = 0;
 	});
+
+	$: if (ready && window.electron && browser) {
+		window.electron.receive('from-main', (data: { type: ElectronEvent }) => {
+			const { type } = data;
+			if (type === ElectronEvent.MAXIMIZE) {
+				isMaximized = true;
+			} else {
+				isMaximized = false;
+			}
+		});
+	}
 </script>
 
-<svelte:head>
-	<script>
-		(function () {
-			/* return if SSR */
-			if (typeof document === 'undefined') return;
-			const theme = localStorage.getItem('theme');
-			if (
-				theme === 'night' ||
-				(!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)
-			) {
-				document.documentElement.setAttribute('data-theme', 'night');
-				localStorage.setItem('theme', 'night');
-			} else {
-				document.documentElement.setAttribute('data-theme', 'corporate');
-				localStorage.setItem('theme', 'corporate');
-			}
-		})();
-	</script>
-</svelte:head>
+{#if ready}
+	<div
+		bind:this={drawercontent}
+		on:scroll={parseContentScroll}
+		class="drawer-content"
+		style="scroll-behavior: smooth; scroll-padding-top: 5rem;"
+	>
+		<div class="dragbar" />
 
-<div
-	bind:this={drawercontent}
-	on:scroll={parseContentScroll}
-	class="drawer-content"
-	style="scroll-behavior: smooth; scroll-padding-top: 5rem;"
->
-	<Navbar {drawerContentScrollY} />
-	<div class="pt-6 px-2 pb-10 md:px-6">
-		<slot />
+		<Navbar {drawerContentScrollY} {isMaximized} />
+		<div class="pt-6 px-2 pb-10 md:px-6">
+			<slot />
+		</div>
 	</div>
-</div>
+{/if}
+
+<style>
+	.dragbar {
+		-webkit-app-region: drag;
+		position: absolute;
+		z-index: 100;
+		height: 40px;
+		width: 100%;
+	}
+</style>

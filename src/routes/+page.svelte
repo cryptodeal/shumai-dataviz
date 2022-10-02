@@ -106,7 +106,7 @@
 			<svelte:fragment slot="tooltip" let:closest>
 				<strong class="text-secondary-content">{closest.label}</strong>
 				<span class="text-sm text-secondary-content">@ {format_x_label(closest.x)}</span>
-				<strong class="text-secondary-content">Hits: </strong>
+				<strong class="text-secondary-content">Hits:</strong>
 				<span class="text-secondary-content">{closest.y}</span>
 			</svelte:fragment>
 		</Line>
@@ -116,7 +116,7 @@
 			<svelte:fragment slot="tooltip" let:closest>
 				<strong class="text-secondary-content">{closest.label}</strong>
 				<span class="text-sm text-secondary-content">@ {format_x_label(closest.x)}</span>
-				<strong class="text-secondary-content">Req/Sec: </strong>
+				<strong class="text-secondary-content">Req/Sec:</strong>
 				<span class="text-secondary-content">{closest.y}</span>
 			</svelte:fragment>
 		</Line>
@@ -126,7 +126,7 @@
 			<svelte:fragment slot="tooltip" let:closest>
 				<strong class="text-secondary-content">{closest.label}</strong>
 				<span class="text-sm text-secondary-content">@ {format_x_label(closest.x)}</span>
-				<strong class="text-secondary-content">Mem Usg: </strong>
+				<strong class="text-secondary-content">Mem Usg:</strong>
 				<span class="text-secondary-content">{closest.y} bytes</span>
 			</svelte:fragment>
 		</Line>

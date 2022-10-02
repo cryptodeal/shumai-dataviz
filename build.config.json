@@ -1,0 +1,20 @@
+{
+	"appId": "com.shumai.app",
+	"productName": "Shumai Analytics",
+	"directories": {
+		"output": "dist"
+	},
+	"files": [
+		"src/electron.cjs",
+		"src/preload.cjs",
+		{
+			"from": "build",
+			"to": ""
+		}
+	],
+	"afterSign": "electron-builder-notarize",
+	"mac": {
+		"hardenedRuntime": true,
+		"entitlements": "./node_modules/electron-builder-notarize/entitlements.mac.inherit.plist"
+	}
+}

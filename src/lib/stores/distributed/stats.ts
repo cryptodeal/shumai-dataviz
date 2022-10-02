@@ -75,19 +75,22 @@ export const tree_map_data = derived(treeMapDatum, ($treeMapDatum) => {
 				children: []
 			});
 			route_idx =
-				((treeMapData.children as TreeMapDatum[])[modelIdx].children as TreeMapDatum[]).length - 1;
+				((treeMapData.children as TreeMapDatum[])[modelIdx].children as TreeMapDatum[])
+					.length - 1;
 		}
 
 		for (const [op_key, op_vals] of Object.entries(value)) {
 			const op_name = op_key.split('@')[0];
 			const op_idx = (
-				((treeMapData.children as TreeMapDatum[])[modelIdx].children as TreeMapDatum[])[route_idx]
-					.children as TreeMapLastChild[]
+				((treeMapData.children as TreeMapDatum[])[modelIdx].children as TreeMapDatum[])[
+					route_idx
+				].children as TreeMapLastChild[]
 			).findIndex((op) => op.name === op_name);
 			if (op_idx === -1) {
 				(
-					((treeMapData.children as TreeMapDatum[])[modelIdx].children as TreeMapDatum[])[route_idx]
-						.children as TreeMapLastChild[]
+					((treeMapData.children as TreeMapDatum[])[modelIdx].children as TreeMapDatum[])[
+						route_idx
+					].children as TreeMapLastChild[]
 				).push({
 					name: op_name,
 					value: op_vals.time,
@@ -97,13 +100,15 @@ export const tree_map_data = derived(treeMapDatum, ($treeMapDatum) => {
 				});
 			} else {
 				(
-					((treeMapData.children as TreeMapDatum[])[modelIdx].children as TreeMapDatum[])[route_idx]
-						.children as TreeMapLastChild[]
+					((treeMapData.children as TreeMapDatum[])[modelIdx].children as TreeMapDatum[])[
+						route_idx
+					].children as TreeMapLastChild[]
 				)[op_idx].value = op_vals.time;
 
 				(
-					((treeMapData.children as TreeMapDatum[])[modelIdx].children as TreeMapDatum[])[route_idx]
-						.children as TreeMapLastChild[]
+					((treeMapData.children as TreeMapDatum[])[modelIdx].children as TreeMapDatum[])[
+						route_idx
+					].children as TreeMapLastChild[]
 				)[op_idx].other_data = {
 					bytes: op_vals.bytes
 				};
@@ -165,7 +170,8 @@ const parseRouteStats = (stats: ModelStats, model_name?: string) => {
 						} else {
 							const { time, bytes } = v[used_key][k];
 							v[used_key][k].time = time * 0.1 + new_stats[k].time * 0.9;
-							v[used_key][k].bytes = Number(bytes) * 0.1 + Number(new_stats[k].bytes) * 0.9;
+							v[used_key][k].bytes =
+								Number(bytes) * 0.1 + Number(new_stats[k].bytes) * 0.9;
 						}
 					}
 				}

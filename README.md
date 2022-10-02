@@ -1,38 +1,64 @@
-# create-svelte
+<p align="center">
+  <img src="static/sveltekit-electron.svg" />
+</p>
 
-Everything you need to build a Svelte project, powered by [`create-svelte`](https://github.com/sveltejs/kit/tree/master/packages/create-svelte).
+# Shumai Analytics
 
-## Creating a project
+Analytics Dashboard for Shumai's `network` module.
 
-If you're seeing this, you've probably already done this step. Congrats!
+## Setup
 
-```bash
-# create a new project in the current directory
-npm create svelte@latest
+Either Build the app using the `Getting Started` steps below or download the latest release.
 
-# create a new project in my-app
-npm create svelte@latest my-app
+### Shumai Distributed Example
+
+1. Clone the [Shumai repository](https://github.com/facebookresearch/shumai)
+2. Setup/install deps & run the distributed `serve.sh` script
+
+```sh
+# install Shumai
+cd shumai
+bun install
+bash examples/distributed/serve.sh
 ```
 
-## Developing
+3. In a new terminal window, run the distributed `client.sh` script
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
-
-```bash
-npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
+```sh
+bash examples/distributed/client.sh
 ```
 
-## Building
+Custom distributed training setup:
 
-To create a production version of your app:
+_N.B. Only working if `host` (central server) is at `localhost:3000` (next release will allow passing in URL for `host`_
 
-```bash
-npm run build
-```
+## Stack
 
-You can preview the production build with `npm run preview`.
+Sveltekit + Electron + Typescript
 
-> To deploy your app, you may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.
+<br />
+
+## Getting Started
+
+You can use either `npm` (`pnpm` confirmed working on OSx), there were known issues with the [SvelteKit/Electron template and `yarn`](https://github.com/FractalHQ/sveltekit-electron/issues/12#issuecomment-1068399385)
+
+|         |                                             |
+| ------- | ------------------------------------------- |
+| Clone   | · `npx degit fractalhq/sveltekit-electron ` |
+| Install | · `npm install`                             |
+| Develop | · `npm run dev`                             |
+| Build   | · `npm run build`                           |
+
+<br />
+
+<p align="center">
+  <img src="screenshot.png" />
+</p>
+
+## Recommended IDE Setup
+
+[VSCode](https://code.visualstudio.com/) + [Svelte for VSCode](https://marketplace.visualstudio.com/items?itemName=svelte.svelte-vscode)
+
+## Change Build Targets
+
+In the scripts section of package.json you can update the `build:electron` command and change the flags to set the targets, by default it uses `-mwl` which is Mac, Windows, and Linux

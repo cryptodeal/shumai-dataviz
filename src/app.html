@@ -4,8 +4,26 @@
 		<meta charset="utf-8" />
 		<link rel="icon" href="%sveltekit.assets%/favicon.png" />
 		<meta name="viewport" content="width=device-width" />
+		<script>
+			(function () {
+				/* return if SSR */
+				if (typeof document === 'undefined') return;
+				const theme = localStorage.getItem('theme');
+				if (
+					theme === 'night' ||
+					(!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)
+				) {
+					document.documentElement.setAttribute('data-theme', 'night');
+					localStorage.setItem('theme', 'night');
+				} else {
+					document.documentElement.setAttribute('data-theme', 'corporate');
+					localStorage.setItem('theme', 'corporate');
+				}
+			})();
+		</script>
 		%sveltekit.head%
 	</head>
+
 	<body>
 		<div>%sveltekit.body%</div>
 	</body>
