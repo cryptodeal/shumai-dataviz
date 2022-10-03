@@ -14,13 +14,16 @@
 	],
 	"win": {
 		"target": {
+			"target": "nsis",
 			"arch": ["x64", "ia32"]
 		}
 	},
 	"mac": {
 		"target": {
+			"target": "default",
 			"arch": ["x64", "arm64"]
-		}
+		},
+		"category": "public.app-category.lifestyle"
 	},
 	"linux": {
 		"category": "Office"
