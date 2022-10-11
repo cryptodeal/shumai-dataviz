@@ -98,14 +98,12 @@ jobs:
       - name: Build
         run: wails build -platform darwin/amd64
 
-      - name: Create Zip
-        run: ditto -c -k --sequesterRsrc --keepParent build/bin/shumai-dash.app shumai-dash_darwin_amd64.zip
-
       - uses: ncipollo/release-action@v1
         with:
           allowUpdates: true
           replacesArtifacts: true
-          artifacts: "shumai-dash_darwin_amd64.zip"
+          artifacts: "build/bin/shumai-dash.app"
+          name: "shumai-dash_darwin_amd64.app"
           token: ${{ secrets.GITHUB_TOKEN }}
 
   build-macos-arm:
@@ -149,12 +147,10 @@ jobs:
       - name: Build
         run: wails build -platform darwin/arm64
 
-      - name: Create Zip
-        run: ditto -c -k --sequesterRsrc --keepParent build/bin/shumai-dash.app shumai-dash_darwin_arm64.zip
-
       - uses: ncipollo/release-action@v1
         with:
           allowUpdates: true
           replacesArtifacts: true
-          artifacts: "shumai-dash_darwin_arm64.zip"
+          artifacts: "build/bin/shumai-dash.app"
+          name: "shumai-dash_darwin_arm64.zip"
           token: ${{ secrets.GITHUB_TOKEN }}
