@@ -1,64 +1,36 @@
-<p align="center">
-  <img src="static/sveltekit-electron.svg" />
-</p>
+# README
 
-# Shumai Analytics
+## About
 
-Analytics Dashboard for Shumai's `network` module.
-
-## Setup
-
-Either Build the app using the `Getting Started` steps below or download the latest release.
-
-### Shumai Distributed Example
-
-1. Clone the [Shumai repository](https://github.com/facebookresearch/shumai)
-2. Setup/install deps & run the distributed `serve.sh` script
-
-```sh
-# install Shumai
-cd shumai
-bun install
-bash examples/distributed/serve.sh
-```
-
-3. In a new terminal window, run the distributed `client.sh` script
-
-```sh
-bash examples/distributed/client.sh
-```
-
-Custom distributed training setup:
-
-_N.B. Only working if `host` (central server) is at `localhost:3000` (next release will allow passing in URL for `host`_
-
-## Stack
-
-Sveltekit + Electron + Typescript
-
-<br />
+This is the Wails SvelteKit template.
+This template uses [adapter-static(SPA)](https://github.com/sveltejs/kit/tree/master/packages/adapter-static#spa-mode) to make generated files embeddable.
 
 ## Getting Started
 
-You can use either `npm` (`pnpm` confirmed working on OSx), there were known issues with the [SvelteKit/Electron template and `yarn`](https://github.com/FractalHQ/sveltekit-electron/issues/12#issuecomment-1068399385)
+### Installing pnpm
 
-|         |                                             |
-| ------- | ------------------------------------------- |
-| Clone   | · `npx degit fractalhq/sveltekit-electron ` |
-| Install | · `npm install`                             |
-| Develop | · `npm run dev`                             |
-| Build   | · `npm run build`                           |
+https://pnpm.io/installation
 
-<br />
+### Installing Wails
 
-<p align="center">
-  <img src="screenshot.png" />
-</p>
+```sh
+go install github.com/wailsapp/wails/v2/cmd/wails@latest
+```
 
-## Recommended IDE Setup
+### Creating a Project
 
-[VSCode](https://code.visualstudio.com/) + [Svelte for VSCode](https://marketplace.visualstudio.com/items?itemName=svelte.svelte-vscode)
+```sh
+wails init -n YOUR_PROJECT_NAME -t https://github.com/h8gi/wails-sveltekit-template
+```
 
-## Change Build Targets
+`wailsjs` modules is located in `/frontend/src/lib` so that you can call them like `$lib/wailsjs/go/main/App` in svelte files.
 
-In the scripts section of package.json you can update the `build:electron` command and change the flags to set the targets, by default it uses `-mwl` which is Mac, Windows, and Linux
+## Live Development
+
+To run in live development mode, run `wails dev` in the project directory. In another terminal, go into the `frontend`
+directory and run `npm run dev`. The frontend dev server will run on http://localhost:34115. Connect to this in your
+browser and connect to your application.
+
+## Building
+
+To build a redistributable, production mode package, use `wails build`.
