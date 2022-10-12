@@ -1,4 +1,5 @@
 import { derived, readable, writable } from 'svelte/store';
+import { LoadStats } from '$lib/wailsjs/go/main/App';
 import { browser } from '$app/environment';
 import type { TreeMapDatum, TreeMapLastChild } from '$lib/viz/tree/types';
 export type BaseStats = Record<
@@ -114,15 +115,10 @@ export const tree_map_data = derived(treeMapDatum, ($treeMapDatum) => {
 });
 
 const fetchStats = () => {
-  return fetch('http://127.0.0.1:3000/statistics')
-    .then((res) => {
-      if (!res.ok) throw new Error(`Error: !res.ok; ${res.status}`);
-      return res.json();
-    })
-    .then((stats) => {
-      // console.log(stats)
-      return parseStats(stats);
-    });
+  return LoadStats('http://127.0.0.1:3000/statistics').then((stats) => {
+    console.log(stats);
+    return parseStats(JSON.parse(stats));
+  });
 };
 
 const parseRouteStats = (stats: ModelStats, model_name?: string) => {
@@ -188,7 +184,7 @@ const parseBytesData = (stats: ModelStats, model_name?: string) => {
   return bytes_used;
 };
 
-const parseStats = (stats: DistTrainingStats) => {
+const parseStats = async (stats: DistTrainingStats) => {
   let route_stats = parseRouteStats(stats as ModelStats);
   let bytes_used = parseBytesData(stats as ModelStats);
   for (const [key, data] of Object.entries(stats)) {

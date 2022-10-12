@@ -1,4 +1,4 @@
-module changeme
+module shumai_dash
 
 go 1.18
 

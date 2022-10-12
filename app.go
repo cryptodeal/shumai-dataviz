@@ -1,6 +1,9 @@
 package main
 
 import (
+	"encoding/json"
+	"io/ioutil"
+	"net/http"
 	"context"
 	"fmt"
 )
@@ -41,4 +44,34 @@ func (a *App) shutdown(ctx context.Context) {
 // Greet returns a greeting for the given name
 func (a *App) Greet(name string) string {
 	return fmt.Sprintf("Hello %s, It's show time!", name)
+}
+
+// parse stats from server
+func(a *App) LoadStats(uri string) string {
+	var f interface{}
+	resp, err := http.Get(uri)
+   if err != nil {
+      fmt.Println(err)
+			return "{}"
+   }
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Println(err)
+		return "{}"
+	}
+	 
+	sb := []byte(body)
+	err = json.Unmarshal(sb, &f)
+	if err != nil {
+		fmt.Println(err)
+		return "{}"
+  }
+
+	res, err := json.Marshal(f)
+	if err != nil {
+		fmt.Println(err)
+		return "{}"
+  }
+	return string(res)
 }
