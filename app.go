@@ -60,6 +60,8 @@ func(a *App) LoadStats(uri string) string {
 		fmt.Println(err)
 		return "{}"
 	}
+	// closes resp body @ end of function
+	defer resp.Body.Close()
 	 
 	sb := []byte(body)
 	err = json.Unmarshal(sb, &f)
