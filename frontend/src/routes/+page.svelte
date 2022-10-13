@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { ioStats, tree_map_data } from '$lib/stores/distributed/stats';
+  import { ioStats, tree_map_data, snapshots } from '$lib/stores/distributed/stats';
   import Line from '$lib/viz/Line.svelte';
   import TreeMap from '$lib/viz/tree/TreeMap.svelte';
   import type { Timer, TreeMapDatum } from '$lib/viz/tree/types';
@@ -7,6 +7,7 @@
   let parsed_stats: Record<string, { x: number; y: number; label?: string }[]> = {};
   let req_per_sec: Record<string, { x: number; y: number; label?: string }[]> = {};
   let bytes_data: Record<string, { x: number; y: number; label?: string }[]> = {};
+  let selected: number;
 
   let clear: Timer,
     used_tree_data: TreeMapDatum,
@@ -52,7 +53,9 @@
     const byte_key_count = bytes_keys.length;
     for (let j = 0; j < byte_key_count; j++) {
       if (!bytes_data[bytes_keys[j]]) {
-        const bytes = Number(BigInt(stat.bytes_used[bytes_keys[j]]));
+        const bytes = stat.bytes_used[bytes_keys[j]]
+          ? Number(BigInt(stat.bytes_used[bytes_keys[j]]))
+          : undefined;
         if (bytes)
           bytes_data[bytes_keys[j]] = [
             {
@@ -131,6 +134,17 @@
       </svelte:fragment>
     </Line>
   </div>
+
+  <!-- TODO: snapshot store works, but need to implement UI && test
+    <select bind:value={selected}>
+      {#each [...$snapshots.keys()] as key, i}
+        <option value={key}>
+          {format_x_label(key)}
+        </option>
+      {/each}
+    </select>
+  -->
+
   {#if used_tree_data}
     <TreeMap data={used_tree_data}>
       <h2 slot="title">Tensor Ops TreeMap</h2>

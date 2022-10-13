@@ -20,7 +20,13 @@ export const ioStats = readable<ParsedStats[]>([], (set) => {
   const values: ParsedStats[] = [];
   fetchStats()
     .then((data) => {
-      values.push({ timestamp: new Date().getTime(), ...data });
+      const { timestamp } = data;
+      values.push(data);
+      let treeMapData: TreeMapDatum | undefined = undefined;
+      tree_map_data.subscribe((val) => {
+        treeMapData = val
+      })
+      if(treeMapData) updateSnapshots(values, timestamp, treeMapData)
       set(values);
     })
     .catch((err) => console.error(`Failed to fetch stats`, err));
@@ -29,7 +35,13 @@ export const ioStats = readable<ParsedStats[]>([], (set) => {
   const id = setInterval(() => {
     fetchStats()
       .then((data) => {
-        values.push({ timestamp: new Date().getTime(), ...data });
+        const { timestamp } = data;
+        values.push(data);
+        let treeMapData: TreeMapDatum | undefined = undefined;
+        tree_map_data.subscribe((val) => {
+          treeMapData = val
+        })
+        if(treeMapData) updateSnapshots(values, timestamp, treeMapData)
         set(values);
       })
       .catch((err) => console.error(`Failed to fetch`, err));
@@ -39,6 +51,16 @@ export const ioStats = readable<ParsedStats[]>([], (set) => {
     clearInterval(id);
   };
 });
+
+const updateSnapshots = (ioStats: ParsedStats[], timestamp: number, treeMapData: TreeMapDatum) => {
+  let v: Map<number, { ioStats: ParsedStats[]; treeMapData: TreeMapDatum }> = new Map()
+  snapshots.subscribe((val) => {
+    v = val
+  })
+  v.set(timestamp, { ioStats, treeMapData })
+  snapshots.set(v)
+}
+export const snapshots = writable<Map<number, { ioStats: ParsedStats[]; treeMapData: TreeMapDatum }>>(new Map())
 
 export const treeMapDatum = writable<
   Record<string, Record<string, { time: number; bytes: number }>>
@@ -116,31 +138,29 @@ export const tree_map_data = derived(treeMapDatum, ($treeMapDatum) => {
 
 const fetchStats = () => {
   return LoadStats('http://127.0.0.1:3000/statistics').then((stats) => {
-    console.log(stats);
-    return parseStats(JSON.parse(stats));
+    const { route_stats, bytes_used } = <{ route_stats: BaseStats; bytes_used: Record<string, bigint>;}>JSON.parse(stats);
+    for (const [key, value] of Object.entries(route_stats)) {
+      updateTreeMap(value, key)
+    }
+    const timestamp = new Date().getTime();
+    return { route_stats, bytes_used, timestamp };
   });
 };
 
-const parseRouteStats = (stats: ModelStats, model_name?: string) => {
-  const route_stats: BaseStats = {};
-  if (stats.statistics) {
-    for (const [key, data] of <
-      [
-        string,
-        {
-          hits: number;
-          seconds: number;
-          op_stats?: Record<string, { time: number; bytes: bigint }>;
-        }
-      ][]
-    >Object.entries(stats.statistics)) {
-      const new_stats = data.op_stats;
+const updateTreeMap = (stats: {
+    hits: number;
+    seconds: number;
+    op_stats?: Record<string, {
+        time: number;
+        bytes: bigint;
+    }>;
+}, used_key: string) => {
+      const new_stats = stats.op_stats;
       if (new_stats) {
         let v: Record<string, Record<string, { time: number; bytes: number }>> = {};
         treeMapDatum.subscribe((val) => {
           v = val;
         });
-        const used_key = model_name ? `${model_name} /${key}` : `/${key}`;
         if (!v[used_key]) {
           v[used_key] = {};
           const new_keys = Object.keys(new_stats);
@@ -167,32 +187,10 @@ const parseRouteStats = (stats: ModelStats, model_name?: string) => {
         }
         treeMapDatum.set(v);
       }
-      // if model_name is given as a param, prefix key with `model_name `
-      route_stats[model_name ? `${model_name} /${key}` : `/${key}`] = data;
-    }
-  }
-  return route_stats;
+  
 };
 
-const parseBytesData = (stats: ModelStats, model_name?: string) => {
-  const bytes_used: Record<string, bigint> = {};
-  if (model_name) {
-    bytes_used[`${model_name} - mem`] = stats.bytes_used;
-  } else {
-    bytes_used['mem'] = stats.bytes_used;
-  }
-  return bytes_used;
-};
-
-const parseStats = async (stats: DistTrainingStats) => {
-  let route_stats = parseRouteStats(stats as ModelStats);
-  let bytes_used = parseBytesData(stats as ModelStats);
-  for (const [key, data] of Object.entries(stats)) {
-    if (key === 'statistics' || key === 'bytes_used' || key === 'op_stats') continue;
-    const model_stats = parseRouteStats(data, key);
-    const model_bytes_used = parseBytesData(data, key);
-    route_stats = { ...route_stats, ...model_stats };
-    bytes_used = { ...bytes_used, ...model_bytes_used };
-  }
+const parseStats = async (stats: { route_stats: BaseStats; bytes_used: Record<string, bigint>; }) => {
+  const { route_stats, bytes_used } = stats;
   return { route_stats, bytes_used };
 };
