@@ -48,3 +48,11 @@ h5 {
 h6 {
   @apply text-base;
 }
+
+.form-field {
+  @apply input input-bordered input-primary text-base w-full max-w-xs;
+}
+
+.form-error {
+  @apply text-error text-center text-sm;
+}

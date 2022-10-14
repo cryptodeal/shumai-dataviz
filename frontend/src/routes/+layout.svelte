@@ -1,9 +1,13 @@
 <script lang="ts">
   import '../app.css';
+  import { getNotificationsStore } from '$lib/stores/notifs';
   import { afterNavigate } from '$app/navigation';
   import Navbar from '$lib/ux/Navbar.svelte';
   import { themeChange } from 'theme-change';
   import { onMount } from 'svelte';
+  import Modal from '$lib/ux/Modal.svelte';
+  import Settings from '$lib/ux/Settings.svelte';
+  import Toast from '$lib/ux/Toast.svelte';
   export const ssr = false;
   let drawercontent: {
     scrollTop: number;
@@ -14,6 +18,9 @@
   function parseContentScroll() {
     drawerContentScrollY = drawercontent.scrollTop;
   }
+
+  // init global notification store
+  getNotificationsStore();
 
   let drawersidebar: {
     scrollTop: number;
@@ -46,3 +53,16 @@
     <slot />
   </div>
 </div>
+
+<!-- settings modal -->
+<Modal modalId="settings_modal">
+  <div slot="header">
+    <h3 class="text-lg font-bold text-center py-4">Settings</h3>
+  </div>
+  <svelte:fragment slot="content">
+    <Settings />
+  </svelte:fragment>
+</Modal>
+
+<!-- svelte toast notifications -->
+<Toast />

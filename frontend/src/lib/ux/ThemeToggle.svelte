@@ -1,4 +1,5 @@
 <script lang="ts">
+  /** eslint-disable a11y-click-events-have-key-events */
   import { browser } from '$app/environment';
   import { WindowSetDarkTheme, WindowSetLightTheme } from '$lib/wailsjs/runtime/runtime';
 
@@ -17,9 +18,10 @@
 </script>
 
 <!-- svelte-ignore a11y-label-has-associated-control -->
+<!-- svelte-ignore a11y-click-events-have-key-events -->
 <label
   data-toggle-theme="night,corporate"
-  class="btn swap swap-rotate {theme === 'corporate' ? 'swap-active' : ''}"
+  class="btn btn-sm btn-circle swap swap-rotate {theme === 'corporate' ? 'swap-active' : ''}"
   on:click={toggleTheme}
 >
   <svg class="swap-on fill-current w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">

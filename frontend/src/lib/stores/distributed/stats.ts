@@ -42,6 +42,15 @@ export const ioStats = readable<ParsedStats[]>([], (set) => {
   };
 });
 
+export const host_uri_store = writable<string>('http://127.0.0.1:3000/statistics');
+export const getHostURI = () => {
+  let host_uri = 'http://127.0.0.1:3000/statistics';
+  host_uri_store.subscribe((val) => {
+    host_uri = val;
+  });
+  return host_uri;
+};
+
 export const treeMapDatum = writable<
   Record<string, Record<string, { time: number; bytes: number }>>
 >({});
@@ -117,7 +126,7 @@ export const tree_map_data = derived(treeMapDatum, ($treeMapDatum) => {
 });
 
 const fetchStats = () => {
-  return LoadStats('http://127.0.0.1:3000/statistics').then((stats) => {
+  return LoadStats(getHostURI()).then((stats) => {
     const { route_stats, bytes_used } = <
       { route_stats: BaseStats; bytes_used: Record<string, bigint> }
     >JSON.parse(stats);

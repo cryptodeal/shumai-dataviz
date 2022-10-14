@@ -29,11 +29,13 @@
 
 <div class="inline-flex gap-2">
   <!-- svelte-ignore a11y-label-has-associated-control -->
+  <!-- svelte-ignore a11y-click-events-have-key-events -->
   <label class="btn btn-xs btn-circle btn-outline" on:click={() => Quit()}>
     <QuitIcon class="fill-current w-3 h-3" />
   </label>
 
   <!-- svelte-ignore a11y-label-has-associated-control -->
+  <!-- svelte-ignore a11y-click-events-have-key-events -->
   <label
     class="btn btn-xs btn-circle btn-outline"
     class:btn-disabled={isFullscreen || isMinimized}
@@ -43,6 +45,7 @@
   </label>
 
   <!-- svelte-ignore a11y-label-has-associated-control -->
+  <!-- svelte-ignore a11y-click-events-have-key-events -->
   <label
     class="btn btn-xs btn-circle btn-outline swap swap-rotate"
     class:swap-active={isFullscreen}

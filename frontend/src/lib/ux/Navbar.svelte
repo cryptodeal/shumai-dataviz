@@ -1,5 +1,6 @@
 <script lang="ts">
-  import OctoCat from '~icons/akar-icons/github-fill';
+  import GithubIcon from '~icons/akar-icons/github-fill';
+  import GearIcon from '~icons/akar-icons/gear';
   import ThemeToggle from '$lib/ux/ThemeToggle.svelte';
   import { BrowserOpenURL } from '$lib/wailsjs/runtime/runtime';
   import FramelessUi from './FramelessUI.svelte';
@@ -50,33 +51,41 @@
           <div
             class="font-title text-primary inline-flex text-lg transition-all duration-200 md:text-3xl"
           >
-            <span class="lowercase {switchNavbarStyle ? 'text-primary' : 'text-primary-content'}">
+            <span class={switchNavbarStyle ? 'text-primary' : 'text-primary-content'}>
               Shumai
             </span>
           </div>
         </a>
       </div>
     </div>
-    <div class="flex-0">
+    <div class="flex-0 gap-2">
       <span
         class="tooltip tooltip-bottom before:text-xs before:content-[attr(data-tip)]"
         data-tip="GitHub"
       >
-        <div class="flex-none items-center">
-          <button
-            aria-label="Github"
-            target="_blank"
-            href="https://github.com/facebookresearch/shumai"
-            rel="noopener"
-            on:click={() => BrowserOpenURL('https://github.com/facebookresearch/shumai')}
-            class="btn btn-ghost drawer-button btn-square normal-case"
-          >
-            <OctoCat class="inline-block h-5 w-5 fill-current md:h-6 md:w-6" />
-          </button>
-        </div>
+        <button
+          aria-label="Github"
+          rel="noopener"
+          on:click={() => BrowserOpenURL('https://github.com/facebookresearch/shumai')}
+          class="btn btn-sm btn-ghost btn-circle drawer-button normal-case"
+        >
+          <GithubIcon class="h-5 w-5 fill-current" />
+        </button>
       </span>
-
-      <ThemeToggle />
+      <span
+        class="tooltip tooltip-bottom before:text-xs before:content-[attr(data-tip)]"
+        data-tip="Theme"
+      >
+        <ThemeToggle />
+      </span>
+      <span
+        class="tooltip tooltip-bottom before:text-xs before:content-[attr(data-tip)]"
+        data-tip="Settings"
+      >
+        <label for="settings_modal" class="btn btn-sm btn-circle modal-button">
+          <GearIcon class="h-5 w-5" />
+        </label>
+      </span>
     </div>
   </nav>
 </div>
