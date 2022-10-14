@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { ioStats, tree_map_data, snapshots } from '$lib/stores/distributed/stats';
+  import { ioStats, tree_map_data } from '$lib/stores/distributed/stats';
   import Line from '$lib/viz/Line.svelte';
   import TreeMap from '$lib/viz/tree/TreeMap.svelte';
   import type { Timer, TreeMapDatum } from '$lib/viz/tree/types';
@@ -7,7 +7,6 @@
   let parsed_stats: Record<string, { x: number; y: number; label?: string }[]> = {};
   let req_per_sec: Record<string, { x: number; y: number; label?: string }[]> = {};
   let bytes_data: Record<string, { x: number; y: number; label?: string }[]> = {};
-  let selected: number;
 
   let clear: Timer,
     used_tree_data: TreeMapDatum,

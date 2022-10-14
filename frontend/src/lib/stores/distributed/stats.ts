@@ -1,4 +1,5 @@
 import { derived, readable, writable } from 'svelte/store';
+import Worker from './worker?worker';
 import { LoadStats } from '$lib/wailsjs/go/main/App';
 import { browser } from '$app/environment';
 import type { TreeMapDatum, TreeMapLastChild } from '$lib/viz/tree/types';
@@ -18,49 +19,28 @@ export type ParsedStats = {
 export const ioStats = readable<ParsedStats[]>([], (set) => {
   if (!browser) return;
   const values: ParsedStats[] = [];
+  const worker = new Worker();
+  worker.onmessage = () => {
+    fetchStats()
+      .then((data) => {
+        values.push(data);
+        set(values);
+      })
+      .catch((err) => console.error(`Failed to fetch stats`, err));
+  };
   fetchStats()
     .then((data) => {
-      const { timestamp } = data;
       values.push(data);
-      let treeMapData: TreeMapDatum | undefined = undefined;
-      tree_map_data.subscribe((val) => {
-        treeMapData = val
-      })
-      if(treeMapData) updateSnapshots(values, timestamp, treeMapData)
       set(values);
     })
     .catch((err) => console.error(`Failed to fetch stats`, err));
 
-  // query stats endpoints 10 x per second
-  const id = setInterval(() => {
-    fetchStats()
-      .then((data) => {
-        const { timestamp } = data;
-        values.push(data);
-        let treeMapData: TreeMapDatum | undefined = undefined;
-        tree_map_data.subscribe((val) => {
-          treeMapData = val
-        })
-        if(treeMapData) updateSnapshots(values, timestamp, treeMapData)
-        set(values);
-      })
-      .catch((err) => console.error(`Failed to fetch`, err));
-  }, 100);
+  worker.postMessage({ type: 'start' });
 
   return () => {
-    clearInterval(id);
+    worker.postMessage({ type: 'stop' });
   };
 });
-
-const updateSnapshots = (ioStats: ParsedStats[], timestamp: number, treeMapData: TreeMapDatum) => {
-  let v: Map<number, { ioStats: ParsedStats[]; treeMapData: TreeMapDatum }> = new Map()
-  snapshots.subscribe((val) => {
-    v = val
-  })
-  v.set(timestamp, { ioStats, treeMapData })
-  snapshots.set(v)
-}
-export const snapshots = writable<Map<number, { ioStats: ParsedStats[]; treeMapData: TreeMapDatum }>>(new Map())
 
 export const treeMapDatum = writable<
   Record<string, Record<string, { time: number; bytes: number }>>
@@ -138,59 +118,61 @@ export const tree_map_data = derived(treeMapDatum, ($treeMapDatum) => {
 
 const fetchStats = () => {
   return LoadStats('http://127.0.0.1:3000/statistics').then((stats) => {
-    const { route_stats, bytes_used } = <{ route_stats: BaseStats; bytes_used: Record<string, bigint>;}>JSON.parse(stats);
+    const { route_stats, bytes_used } = <
+      { route_stats: BaseStats; bytes_used: Record<string, bigint> }
+    >JSON.parse(stats);
     for (const [key, value] of Object.entries(route_stats)) {
-      updateTreeMap(value, key)
+      updateTreeMap(value, key);
     }
     const timestamp = new Date().getTime();
     return { route_stats, bytes_used, timestamp };
   });
 };
 
-const updateTreeMap = (stats: {
+const updateTreeMap = (
+  stats: {
     hits: number;
     seconds: number;
-    op_stats?: Record<string, {
+    op_stats?: Record<
+      string,
+      {
         time: number;
         bytes: bigint;
-    }>;
-}, used_key: string) => {
-      const new_stats = stats.op_stats;
-      if (new_stats) {
-        let v: Record<string, Record<string, { time: number; bytes: number }>> = {};
-        treeMapDatum.subscribe((val) => {
-          v = val;
-        });
-        if (!v[used_key]) {
-          v[used_key] = {};
-          const new_keys = Object.keys(new_stats);
-          for (const k of new_keys) {
-            v[used_key][k] = {
-              time: new_stats[k].time,
-              bytes: Number(new_stats[k].bytes)
-            };
-          }
-        } else {
-          const new_keys = Object.keys(new_stats);
-          for (const k of new_keys) {
-            if (!v[used_key][k]) {
-              v[used_key][k] = {
-                time: new_stats[k].time,
-                bytes: Number(new_stats[k].bytes)
-              };
-            } else {
-              const { time, bytes } = v[used_key][k];
-              v[used_key][k].time = time * 0.1 + new_stats[k].time * 0.9;
-              v[used_key][k].bytes = Number(bytes) * 0.1 + Number(new_stats[k].bytes) * 0.9;
-            }
-          }
-        }
-        treeMapDatum.set(v);
       }
-  
-};
-
-const parseStats = async (stats: { route_stats: BaseStats; bytes_used: Record<string, bigint>; }) => {
-  const { route_stats, bytes_used } = stats;
-  return { route_stats, bytes_used };
+    >;
+  },
+  used_key: string
+) => {
+  const new_stats = stats.op_stats;
+  if (new_stats) {
+    let v: Record<string, Record<string, { time: number; bytes: number }>> = {};
+    treeMapDatum.subscribe((val) => {
+      v = val;
+    });
+    if (!v[used_key]) {
+      v[used_key] = {};
+      const new_keys = Object.keys(new_stats);
+      for (const k of new_keys) {
+        v[used_key][k] = {
+          time: new_stats[k].time,
+          bytes: Number(new_stats[k].bytes)
+        };
+      }
+    } else {
+      const new_keys = Object.keys(new_stats);
+      for (const k of new_keys) {
+        if (!v[used_key][k]) {
+          v[used_key][k] = {
+            time: new_stats[k].time,
+            bytes: Number(new_stats[k].bytes)
+          };
+        } else {
+          const { time, bytes } = v[used_key][k];
+          v[used_key][k].time = time * 0.1 + new_stats[k].time * 0.9;
+          v[used_key][k].bytes = Number(bytes) * 0.1 + Number(new_stats[k].bytes) * 0.9;
+        }
+      }
+    }
+    treeMapDatum.set(v);
+  }
 };

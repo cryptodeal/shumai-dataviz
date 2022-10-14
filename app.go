@@ -70,7 +70,7 @@ func ParseData(obj interface{}) (int64, interface{}) {
 
 
 
-func ParseBytesUsed(obj interface{}) (map[string]int64, map[string]interface{}) {
+func ParseStats(obj interface{}) (map[string]int64, map[string]interface{}) {
 	mem, stats := ParseData(obj)
 	bytes_used := map[string]int64{
 		"mem": mem,
@@ -133,7 +133,7 @@ func(a *App) LoadStats(uri string) string {
 		return "{}"
   }
 
-	bytes_used, route_stats := ParseBytesUsed(f)
+	bytes_used, route_stats := ParseStats(f)
 	out := map[string]interface{}{
 		"bytes_used": bytes_used,
 		"route_stats": route_stats,
