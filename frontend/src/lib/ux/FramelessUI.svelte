@@ -15,7 +15,6 @@
   $: isFullscreen = $WindowState.isFullscreen;
   $: isMinimized = $WindowState.isMinimized;
 
-  $: console.log($WindowState);
   function toggleFullscreen() {
     if (isFullscreen === false) {
       isFullscreen = true;

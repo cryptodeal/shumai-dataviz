@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"io"
+	"time"
 	"strconv"
 	"net/http"
 	"context"
@@ -109,19 +110,38 @@ func ParseStats(obj interface{}) (map[string]int64, map[string]interface{}) {
 	return bytes_used, route_stats
 }
 
+func httpClient() *http.Client {
+    client := &http.Client{
+        Transport: &http.Transport{
+          TLSHandshakeTimeout: 5 * time.Second,
+        },
+				Timeout: 5 * time.Second,
+    }
+    return client
+}
+
+var client = httpClient()
+
 // parse stats from server
 func(a *App) LoadStats(uri string) string {
 	var f interface{}
-	resp, err := http.Get(uri)
+	req, err := http.NewRequest("get", uri, nil)
   if err != nil {
 		fmt.Println(err)
-		return "{}"
+		return `{"bytes_used":{},"route_stats":{}}`
   }
+
+	resp, err := client.Do(req)
+	if err != nil {
+		fmt.Println(err)
+		return `{"bytes_used":{},"route_stats":{}}`
+	}
+
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		fmt.Println(err)
-		return "{}"
+		return `{"bytes_used":{},"route_stats":{}}`
 	}
 	// closes resp body @ end of function
 	defer resp.Body.Close()
@@ -129,8 +149,9 @@ func(a *App) LoadStats(uri string) string {
 	sb := []byte(body)
 	err = json.Unmarshal(sb, &f)
 	if err != nil {
+		fmt.Println("body bytes: ", len(sb))
 		fmt.Println(err)
-		return "{}"
+		return `{"bytes_used":{},"route_stats":{}}`
   }
 
 	bytes_used, route_stats := ParseStats(f)
@@ -142,7 +163,7 @@ func(a *App) LoadStats(uri string) string {
 	res, err := json.Marshal(out)
 	if err != nil {
 		fmt.Println(err)
-		return "{}"
+		return `{"bytes_used":{},"route_stats":{}}`
   }
 	return string(res)
 }

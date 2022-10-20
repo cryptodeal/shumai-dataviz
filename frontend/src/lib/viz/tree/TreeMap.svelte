@@ -112,6 +112,7 @@
       <Pancake.Chart x1={$extents.x1} x2={$extents.x2} y1={$extents.y1} y2={$extents.y2}>
         <Map {root} let:node>
           {#if is_visible(node, selected)}
+            <!-- svelte-ignore a11y-click-events-have-key-events -->
             <div
               transition:fade={{ duration: 350 }}
               class="node"

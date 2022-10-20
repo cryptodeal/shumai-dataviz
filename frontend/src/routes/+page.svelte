@@ -3,6 +3,8 @@
   import Line from '$lib/viz/Line.svelte';
   import TreeMap from '$lib/viz/tree/TreeMap.svelte';
   import type { Timer, TreeMapDatum } from '$lib/viz/tree/types';
+  import { getContext } from 'svelte';
+  import type { Writable } from 'svelte/store';
 
   let parsed_stats: Record<string, { x: number; y: number; label?: string }[]> = {};
   let req_per_sec: Record<string, { x: number; y: number; label?: string }[]> = {};
@@ -14,6 +16,11 @@
     // TODO: allow changing interval w range slider input
     interval = 5000;
 
+  const largeCharts = <Writable<boolean>>getContext('largeCharts'),
+    isHitsVisible = <Writable<boolean>>getContext('isHitsVisible'),
+    isAvgReqTimeVisible = <Writable<boolean>>getContext('isAvgReqTimeVisible'),
+    isMemVisible = <Writable<boolean>>getContext('isMemVisible');
+
   $: if (!has_tree_data && $tree_map_data.children.length) {
     has_tree_data = true;
     used_tree_data = $tree_map_data;
@@ -24,7 +31,6 @@
     clearInterval(clear);
     clear = setInterval(updateTreeData, interval);
   }
-
   $: $ioStats?.map((stat, i) => {
     if (i === 0) parsed_stats = {};
     if (i === 0) req_per_sec = {};
@@ -42,6 +48,7 @@
       });
 
       if (!req_per_sec[route_keys[j]]) req_per_sec[route_keys[j]] = [];
+
       req_per_sec[route_keys[j]].push({
         x: stat.timestamp,
         y: stat.route_stats[route_keys[j]].hits / stat.route_stats[route_keys[j]].seconds,
@@ -102,8 +109,17 @@
 
 <div class="flex flex-col justify-center gap-y-10 md:gap-y-32">
   <h1 class="text-center">Shumai Distributed Training Analytics</h1>
-  <div class="items-center md:mx-10 justify-center grid grid-cols-1 xl:grid-cols-2 gap-10">
-    <Line {format_x_label} format_y_label={format_y_label_hits} data={parsed_stats}>
+  <div
+    class="items-center md:mx-10 justify-center grid grid-cols-1 gap-10"
+    class:xlCharts={$largeCharts}
+    class:charts={!$largeCharts}
+  >
+    <Line
+      {format_x_label}
+      format_y_label={format_y_label_hits}
+      data={parsed_stats}
+      hidden={!$isHitsVisible}
+    >
       <h2 slot="title">Route Statistics</h2>
       <svelte:fragment slot="tooltip" let:closest>
         <strong class="text-secondary-content">{closest.label}</strong>
@@ -113,7 +129,12 @@
       </svelte:fragment>
     </Line>
 
-    <Line {format_x_label} format_y_label={format_y_label_avg_req_time} data={req_per_sec}>
+    <Line
+      {format_x_label}
+      format_y_label={format_y_label_avg_req_time}
+      data={req_per_sec}
+      hidden={!$isAvgReqTimeVisible}
+    >
       <h2 slot="title">Avg. Req/Sec By Route</h2>
       <svelte:fragment slot="tooltip" let:closest>
         <strong class="text-secondary-content">{closest.label}</strong>
@@ -123,7 +144,12 @@
       </svelte:fragment>
     </Line>
 
-    <Line {format_x_label} format_y_label={format_y_label_bytes} data={bytes_data}>
+    <Line
+      {format_x_label}
+      format_y_label={format_y_label_bytes}
+      data={bytes_data}
+      hidden={!$isMemVisible}
+    >
       <h2 slot="title">Memory Usage (Bytes)</h2>
       <svelte:fragment slot="tooltip" let:closest>
         <strong class="text-secondary-content">{closest.label}</strong>
@@ -150,3 +176,13 @@
     </TreeMap>
   {/if}
 </div>
+
+<style>
+  .charts {
+    @apply grid-cols-2;
+  }
+
+  .xlCharts {
+    @apply grid-cols-1;
+  }
+</style>

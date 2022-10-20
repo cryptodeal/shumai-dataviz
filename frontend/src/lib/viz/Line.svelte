@@ -9,6 +9,7 @@
   > = {};
   export let format_x_label: (x: number) => string;
   export let format_y_label: (y: number) => string;
+  export let hidden = false;
 
   let closest: { x: number; y: number; label?: string } & Record<string, string | number>,
     x1 = Infinity,
@@ -36,71 +37,73 @@
   });
 </script>
 
-<ChartWrapper>
-  <div class="grid grid-cols-1 lg:grid-cols-5 gap-10 gap-y-1 justify-center items-center">
-    <div
-      class="order-last lg:order-first lg:col-span-1 grid grid-cols-1 gap-y-1 justify-self-center items-center"
-    >
-      {#each labels as { label }, i}
-        {@const color = colors[i]}
-        <div
-          class="inline-flex items-center gap-2"
-          class:disabled_label={!labels[i].enabled}
-          on:click={() => (labels[i].enabled = !labels[i].enabled)}
-        >
-          <div class="badge badge-sm colored_badge" style:--bg_color={color} />
-          <span>{label}</span>
+<div class:hidden>
+  <ChartWrapper>
+    <div class="grid grid-cols-1 lg:grid-cols-5 gap-10 gap-y-1 justify-center items-center">
+      <div
+        class="order-last lg:order-first lg:col-span-1 grid grid-cols-1 gap-y-1 justify-self-center items-center"
+      >
+        {#each labels as { label }, i}
+          {@const color = colors[i]}
+          <div
+            class="inline-flex items-center gap-2"
+            class:disabled_label={!labels[i].enabled}
+            on:click={() => (labels[i].enabled = !labels[i].enabled)}
+          >
+            <div class="badge badge-sm colored_badge" style:--bg_color={color} />
+            <span>{label}</span>
+          </div>
+        {/each}
+      </div>
+      <div class="flex flex-col gap-y-5 justify-center lg:col-span-4">
+        <div class="text-center">
+          <slot name="title" />
         </div>
-      {/each}
-    </div>
-    <div class="flex flex-col gap-y-5 justify-center lg:col-span-4">
-      <div class="text-center">
-        <slot name="title" />
-      </div>
-      <div class="chart">
-        <Pancake.Chart {x1} {x2} {y1} y2={y2 === y1 ? y1 + 10 : y2}>
-          <Pancake.Grid horizontal count={4} let:value>
-            <div class="grid-line horizontal">
-              <span>{format_y_label(value)}</span>
-            </div>
-          </Pancake.Grid>
-
-          <Pancake.Grid vertical count={3} let:value>
-            <span class="x-label">{format_x_label(value)}</span>
-          </Pancake.Grid>
-
-          {#each Object.values(data) as datum, i}
-            {@const color = colors[i]}
-
-            {#if labels[i].enabled && datum.length > 1}
-              <Pancake.Svg>
-                <Pancake.SvgLine data={datum} let:d>
-                  <path class="data" style:--stroke_color={color} {d} />
-                </Pancake.SvgLine>
-              </Pancake.Svg>
-            {/if}
-          {/each}
-
-          {#if closest && labels.some((x) => x.label === closest.label && x.enabled)}
-            <Pancake.Point x={closest.x} y={closest.y}>
-              <span class="annotation-point" />
-              <div
-                class="annotation bg-secondary navButton {y2 - closest.y >= closest.y - y1
-                  ? 'locBottom'
-                  : 'locTop'}"
-                style="transform: translate(-{100 * ((closest.x - x1) / (x2 - x1))}%,0);"
-              >
-                <slot name="tooltip" {closest} />
+        <div class="chart">
+          <Pancake.Chart {x1} {x2} {y1} y2={y2 === y1 ? y1 + 10 : y2}>
+            <Pancake.Grid horizontal count={4} let:value>
+              <div class="grid-line horizontal">
+                <span>{format_y_label(value)}</span>
               </div>
-            </Pancake.Point>
-          {/if}
+            </Pancake.Grid>
 
-          <Pancake.Quadtree data={all_data} bind:closest />
-        </Pancake.Chart>
+            <Pancake.Grid vertical count={3} let:value>
+              <span class="x-label">{format_x_label(value)}</span>
+            </Pancake.Grid>
+
+            {#each Object.values(data) as datum, i}
+              {@const color = colors[i]}
+
+              {#if labels[i].enabled && datum.length > 1}
+                <Pancake.Svg>
+                  <Pancake.SvgLine data={datum} let:d>
+                    <path class="data" style:--stroke_color={color} {d} />
+                  </Pancake.SvgLine>
+                </Pancake.Svg>
+              {/if}
+            {/each}
+
+            {#if closest && labels.some((x) => x.label === closest.label && x.enabled)}
+              <Pancake.Point x={closest.x} y={closest.y}>
+                <span class="annotation-point" />
+                <div
+                  class="annotation bg-secondary navButton {y2 - closest.y >= closest.y - y1
+                    ? 'locBottom'
+                    : 'locTop'}"
+                  style="transform: translate(-{100 * ((closest.x - x1) / (x2 - x1))}%,0);"
+                >
+                  <slot name="tooltip" {closest} />
+                </div>
+              </Pancake.Point>
+            {/if}
+
+            <Pancake.Quadtree data={all_data} bind:closest />
+          </Pancake.Chart>
+        </div>
       </div>
     </div>
-  </div>
-</ChartWrapper>
+  </ChartWrapper>
+</div>
 
 <style>
   .chart {

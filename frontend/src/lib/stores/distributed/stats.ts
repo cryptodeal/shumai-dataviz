@@ -1,4 +1,5 @@
 import { derived, readable, writable } from 'svelte/store';
+
 import Worker from './worker?worker';
 import { LoadStats } from '$lib/wailsjs/go/main/App';
 import { browser } from '$app/environment';
@@ -10,10 +11,45 @@ export type BaseStats = Record<
 type ModelStats = Record<string, unknown> & { statistics: BaseStats; bytes_used: bigint };
 export type DistTrainingStats = Record<string, ModelStats>;
 
-export type ParsedStats = {
+export type ParsedStats = Record<string, any> & {
   route_stats: BaseStats;
   bytes_used: Record<string, bigint>;
   timestamp: number;
+};
+
+export const deepEquals = (a: ParsedStats, b: ParsedStats) => {
+  for (const [key, value] of Object.entries(a)) {
+    if (key === 'timestamp') continue;
+
+    switch (typeof value) {
+      case 'object':
+        // handle `typeof null === 'object'`
+        if (a[key] === null) {
+          if (b[key] === null) {
+            break;
+          } else {
+            return false;
+          }
+        }
+        if (!b[key]) return false;
+        if (!deepEquals(a[key], b[key])) return false;
+        break;
+      case 'bigint':
+        if (!b[key]) return false;
+        if (a[key] !== b[key]) return false;
+        break;
+      case 'number':
+        if (!b[key]) return false;
+        if (a[key] !== b[key]) return false;
+        break;
+      case 'string':
+        if (!b[key]) return false;
+        if (a[key] !== b[key]) return false;
+        break;
+      default:
+        throw new Error(`Unexpected type: ${typeof value} @ key: ${key}`);
+    }
+  }
 };
 
 export const ioStats = readable<ParsedStats[]>([], (set) => {

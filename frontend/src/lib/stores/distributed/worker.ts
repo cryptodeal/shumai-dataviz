@@ -6,6 +6,15 @@ export type WorkerMessageData = {
   type: 'query_stats';
 };
 
+type BaseData = {
+  type: 'start' | 'stop';
+};
+
+export type WorkerStartData = BaseData & {
+  type: 'start';
+  interval?: number;
+};
+
 let timer: ReturnType<typeof setInterval>;
 
 ctx.onmessage = function (e: MessageEvent<{ type: string }>) {
@@ -14,7 +23,7 @@ ctx.onmessage = function (e: MessageEvent<{ type: string }>) {
     case 'start':
       timer = setInterval(() => {
         ctx.postMessage({ type: 'query_stats' });
-      }, 100);
+      }, (data as WorkerStartData).interval || 150);
       break;
     case 'stop':
       clearInterval(timer); // resets `timer`, clearing interval

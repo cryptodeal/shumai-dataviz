@@ -11,7 +11,7 @@ import (
 	"github.com/wailsapp/wails/v2/pkg/options/windows"
 )
 
-//go:embed all:frontend/build/*
+//go:embed all:frontend/build
 var assets embed.FS
 
 func main() {
@@ -30,7 +30,6 @@ func main() {
 		Frameless:         true,
 		StartHidden:       false,
 		HideWindowOnClose: false,
-		RGBA:              &options.RGBA{R: 0, G: 0, B: 0, A: 0},
 		Assets:            assets,
 		Menu:              nil,
 		Logger:            nil,

@@ -1,14 +1,25 @@
 <script lang="ts">
   import '../app.css';
+  import { writable } from 'svelte/store';
   import { getNotificationsStore } from '$lib/stores/notifs';
   import { afterNavigate } from '$app/navigation';
   import Navbar from '$lib/ux/Navbar.svelte';
   import { themeChange } from 'theme-change';
-  import { onMount } from 'svelte';
+  import { onMount, setContext } from 'svelte';
   import Modal from '$lib/ux/Modal.svelte';
   import Settings from '$lib/ux/Settings.svelte';
   import Toast from '$lib/ux/Toast.svelte';
   export const ssr = false;
+
+  let isHitsVisible = writable(true);
+  setContext('isHitsVisible', isHitsVisible);
+  let isAvgReqTimeVisible = writable(true);
+  setContext('isAvgReqTimeVisible', isAvgReqTimeVisible);
+  let isMemVisible = writable(true);
+  setContext('isMemVisible', isMemVisible);
+  let largeCharts = writable(false);
+  setContext('largeCharts', largeCharts);
+
   let drawercontent: {
     scrollTop: number;
   } = {
