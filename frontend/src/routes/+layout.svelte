@@ -60,7 +60,7 @@
   style="scroll-behavior: smooth; scroll-padding-top: 5rem;"
 >
   <Navbar {drawerContentScrollY} />
-  <div class="pt-6 px-2 pb-10 md:px-6">
+  <div class="pt-0 px-2 pb-10 md:px-6">
     <slot />
   </div>
 </div>

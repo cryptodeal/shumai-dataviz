@@ -10,7 +10,7 @@
 
 <div
   style="--wails-draggable:drag;"
-  class="sticky top-0 z-30 flex h-20 w-full justify-center bg-opacity-90 backdrop-blur transition-all duration-100 {switchNavbarStyle
+  class="sticky top-0 z-30 flex w-full justify-center bg-opacity-90 backdrop-blur transition-all duration-100 {switchNavbarStyle
     ? 'bg-base-100 text-base-content shadow-sm'
     : 'bg-base-100 text-base-content'}"
 >
