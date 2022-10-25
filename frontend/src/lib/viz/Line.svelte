@@ -2,7 +2,13 @@
   import * as Pancake from '@sveltejs/pancake';
   import { genColors } from '$lib/utils';
   import ChartWrapper from '$lib/ux/ChartWrapper.svelte';
-
+  import RangeSlider from './RangeSlider.svelte';
+  export const resetScale = () => {
+    x1 = Infinity;
+    x2 = -Infinity;
+    y1 = Infinity;
+    y2 = -Infinity;
+  };
   export let data: Record<
     string,
     ({ x: number; y: number; label?: string } & Record<string, string | number>)[]
@@ -45,14 +51,14 @@
       >
         {#each labels as { label }, i}
           {@const color = colors[i]}
-          <div
+          <button
             class="inline-flex items-center gap-2"
             class:disabled_label={!labels[i].enabled}
             on:click={() => (labels[i].enabled = !labels[i].enabled)}
           >
             <div class="badge badge-sm colored_badge" style:--bg_color={color} />
             <span>{label}</span>
-          </div>
+          </button>
         {/each}
       </div>
       <div class="flex flex-col gap-y-5 justify-center lg:col-span-4">
@@ -96,9 +102,11 @@
                 </div>
               </Pancake.Point>
             {/if}
-
             <Pancake.Quadtree data={all_data} bind:closest />
           </Pancake.Chart>
+        </div>
+        <div class="lg:col-span-4 lg:row-start-1 slider">
+          <RangeSlider />
         </div>
       </div>
     </div>
@@ -111,6 +119,11 @@
     padding: 1.5em 2.75em 1.5em 6em;
     margin: 0 0 36px 0;
     overflow: hidden;
+  }
+
+  .slider {
+    padding-right: 2.75em;
+    padding-left: 6em;
   }
 
   .colored_badge {

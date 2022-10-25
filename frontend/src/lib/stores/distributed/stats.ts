@@ -1,5 +1,4 @@
 import { derived, readable, writable } from 'svelte/store';
-
 import Worker from './worker?worker';
 import { LoadStats } from '$lib/wailsjs/go/main/App';
 import { browser } from '$app/environment';
@@ -15,6 +14,22 @@ export type ParsedStats = Record<string, any> & {
   route_stats: BaseStats;
   bytes_used: Record<string, bigint>;
   timestamp: number;
+};
+
+export const extents = writable<{ bounds: [number, number]; isDefault: boolean }>({
+  bounds: [0, Infinity],
+  isDefault: true
+});
+
+export const getSelectedExtents = () => {
+  let res = {
+    bounds: [0, 0],
+    isDefault: true
+  };
+  extents.subscribe((val) => {
+    res = val;
+  });
+  return res;
 };
 
 export const deepEquals = (a: ParsedStats, b: ParsedStats) => {
@@ -60,6 +75,12 @@ export const ioStats = readable<ParsedStats[]>([], (set) => {
     fetchStats()
       .then((data) => {
         values.push(data);
+        extents.update((v) => {
+          if (v.isDefault) {
+            v.bounds[1] = data.timestamp;
+          }
+          return v;
+        });
         set(values);
       })
       .catch((err) => console.error(`Failed to fetch stats`, err));
@@ -67,6 +88,10 @@ export const ioStats = readable<ParsedStats[]>([], (set) => {
   fetchStats()
     .then((data) => {
       values.push(data);
+      extents.update((v) => {
+        v.bounds = [data.timestamp, data.timestamp];
+        return v;
+      });
       set(values);
     })
     .catch((err) => console.error(`Failed to fetch stats`, err));

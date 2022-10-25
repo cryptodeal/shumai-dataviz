@@ -1,14 +1,16 @@
 <script lang="ts">
-  import { ioStats, tree_map_data } from '$lib/stores/distributed/stats';
+  import { ioStats, tree_map_data, extents } from '$lib/stores/distributed/stats';
   import Line from '$lib/viz/Line.svelte';
   import TreeMap from '$lib/viz/tree/TreeMap.svelte';
   import type { Timer, TreeMapDatum } from '$lib/viz/tree/types';
-  import { getContext } from 'svelte';
-  import type { Writable } from 'svelte/store';
+  import { getContext, setContext } from 'svelte';
+  import { writable, type Writable } from 'svelte/store';
 
   let parsed_stats: Record<string, { x: number; y: number; label?: string }[]> = {};
   let req_per_sec: Record<string, { x: number; y: number; label?: string }[]> = {};
   let bytes_data: Record<string, { x: number; y: number; label?: string }[]> = {};
+
+  let resetScale1: () => void, resetScale2: () => void, resetScale3: () => void;
 
   let clear: Timer,
     used_tree_data: TreeMapDatum,
@@ -19,7 +21,18 @@
   const largeCharts = <Writable<boolean>>getContext('largeCharts'),
     isHitsVisible = <Writable<boolean>>getContext('isHitsVisible'),
     isAvgReqTimeVisible = <Writable<boolean>>getContext('isAvgReqTimeVisible'),
-    isMemVisible = <Writable<boolean>>getContext('isMemVisible');
+    isMemVisible = <Writable<boolean>>getContext('isMemVisible'),
+    sliderStart = writable<number>(0),
+    sliderEnd = writable<number>(1);
+
+  setContext('sliderStart', sliderStart);
+  setContext('sliderEnd', sliderEnd);
+  $: x_range = $extents.bounds[1] - $extents.bounds[0];
+  $: used_data_start = $sliderStart * x_range + $extents.bounds[0];
+
+  $: used_data_end = $extents.bounds[1] - (1 - $sliderEnd) * x_range;
+
+  // $: console.log('used_data_start:', used_data_start, ', used_data_end:', used_data_end);
 
   $: if (!has_tree_data && $tree_map_data.children.length) {
     has_tree_data = true;
@@ -31,10 +44,22 @@
     clearInterval(clear);
     clear = setInterval(updateTreeData, interval);
   }
-  $: $ioStats?.map((stat, i) => {
-    if (i === 0) parsed_stats = {};
-    if (i === 0) req_per_sec = {};
-    if (i === 0) bytes_data = {};
+
+  $: for (let i = 0; i < $ioStats.length; i++) {
+    if (i === 0) {
+      parsed_stats = {};
+      req_per_sec = {};
+      bytes_data = {};
+      if ($sliderStart !== 0 || $sliderEnd !== 1) {
+        // TODO: a bit hacky
+        resetScale1();
+        resetScale2();
+        resetScale3();
+      }
+    }
+    const stat = $ioStats[i];
+    if (stat.timestamp < used_data_start) continue;
+    if (stat.timestamp > used_data_end) break;
 
     const route_keys = Object.keys(stat.route_stats);
     const key_count = route_keys.length;
@@ -80,7 +105,7 @@
           });
       }
     }
-  });
+  }
 
   const format_x_label = (x: number) => {
     const date = new Date(x);
@@ -117,6 +142,7 @@
     <Line
       {format_x_label}
       format_y_label={format_y_label_hits}
+      bind:resetScale={resetScale1}
       data={parsed_stats}
       hidden={!$isHitsVisible}
     >
@@ -132,6 +158,7 @@
     <Line
       {format_x_label}
       format_y_label={format_y_label_avg_req_time}
+      bind:resetScale={resetScale2}
       data={req_per_sec}
       hidden={!$isAvgReqTimeVisible}
     >
@@ -147,6 +174,7 @@
     <Line
       {format_x_label}
       format_y_label={format_y_label_bytes}
+      bind:resetScale={resetScale3}
       data={bytes_data}
       hidden={!$isMemVisible}
     >

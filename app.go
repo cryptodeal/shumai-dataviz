@@ -113,9 +113,9 @@ func ParseStats(obj interface{}) (map[string]int64, map[string]interface{}) {
 func httpClient() *http.Client {
     client := &http.Client{
         Transport: &http.Transport{
-          TLSHandshakeTimeout: 5 * time.Second,
+					MaxConnsPerHost: 10,
         },
-				Timeout: 5 * time.Second,
+				Timeout: 2 * time.Second,
     }
     return client
 }
@@ -130,6 +130,8 @@ func(a *App) LoadStats(uri string) string {
 		fmt.Println(err)
 		return `{"bytes_used":{},"route_stats":{}}`
   }
+	
+	req.Header.Add("Accept", `application/json`)
 
 	resp, err := client.Do(req)
 	if err != nil {
@@ -137,14 +139,15 @@ func(a *App) LoadStats(uri string) string {
 		return `{"bytes_used":{},"route_stats":{}}`
 	}
 
+	// closes resp body @ end of function
+	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		fmt.Println(err)
 		return `{"bytes_used":{},"route_stats":{}}`
 	}
-	// closes resp body @ end of function
-	defer resp.Body.Close()
+
 	 
 	sb := []byte(body)
 	err = json.Unmarshal(sb, &f)
