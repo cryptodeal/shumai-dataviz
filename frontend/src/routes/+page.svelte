@@ -132,28 +132,12 @@
   };
 </script>
 
-<div class="flex flex-col justify-center gap-y-10 md:gap-y-32">
-  <h1 class="text-center">Shumai Distributed Training Analytics</h1>
+<div class="flex flex-col justify-center gap-y-0 md:gap-y-2">
   <div
-    class="items-center md:mx-10 justify-center grid grid-cols-1 gap-10"
+    class="items-center md:mx-0 justify-center grid grid-cols-1 gap-5"
     class:xlCharts={$largeCharts}
     class:charts={!$largeCharts}
   >
-    <Line
-      {format_x_label}
-      format_y_label={format_y_label_hits}
-      bind:resetScale={resetScale1}
-      data={parsed_stats}
-      hidden={!$isHitsVisible}
-    >
-      <h2 slot="title">Route Statistics</h2>
-      <svelte:fragment slot="tooltip" let:closest>
-        <strong class="text-secondary-content">{closest.label}</strong>
-        <span class="text-sm text-secondary-content">@ {format_x_label(closest.x)}</span>
-        <strong class="text-secondary-content">Hits:</strong>
-        <span class="text-secondary-content">{closest.y}</span>
-      </svelte:fragment>
-    </Line>
 
     <Line
       {format_x_label}
@@ -162,7 +146,7 @@
       data={req_per_sec}
       hidden={!$isAvgReqTimeVisible}
     >
-      <h2 slot="title">Avg. Req/Sec By Route</h2>
+      <h5 slot="title">Avg. Req/Sec By Route</h5>
       <svelte:fragment slot="tooltip" let:closest>
         <strong class="text-secondary-content">{closest.label}</strong>
         <span class="text-sm text-secondary-content">@ {format_x_label(closest.x)}</span>
@@ -178,7 +162,7 @@
       data={bytes_data}
       hidden={!$isMemVisible}
     >
-      <h2 slot="title">Memory Usage (Bytes)</h2>
+      <h5 slot="title">Memory Usage (Bytes)</h5>
       <svelte:fragment slot="tooltip" let:closest>
         <strong class="text-secondary-content">{closest.label}</strong>
         <span class="text-sm text-secondary-content">@ {format_x_label(closest.x)}</span>
@@ -186,6 +170,29 @@
         <span class="text-secondary-content">{closest.y} bytes</span>
       </svelte:fragment>
     </Line>
+
+    <Line
+      {format_x_label}
+      format_y_label={format_y_label_hits}
+      bind:resetScale={resetScale1}
+      data={parsed_stats}
+      hidden={!$isHitsVisible}
+    >
+      <h5 slot="title">Route Statistics</h5>
+      <svelte:fragment slot="tooltip" let:closest>
+        <strong class="text-secondary-content">{closest.label}</strong>
+        <span class="text-sm text-secondary-content">@ {format_x_label(closest.x)}</span>
+        <strong class="text-secondary-content">Hits:</strong>
+        <span class="text-secondary-content">{closest.y}</span>
+      </svelte:fragment>
+    </Line>
+
+  {#if used_tree_data}
+    <TreeMap data={used_tree_data}>
+      <h5 slot="title">Tensor Ops TreeMap</h5>
+    </TreeMap>
+  {/if}
+
   </div>
 
   <!-- TODO: snapshot store works, but need to implement UI && test
@@ -197,12 +204,6 @@
       {/each}
     </select>
   -->
-
-  {#if used_tree_data}
-    <TreeMap data={used_tree_data}>
-      <h2 slot="title">Tensor Ops TreeMap</h2>
-    </TreeMap>
-  {/if}
 </div>
 
 <style>
