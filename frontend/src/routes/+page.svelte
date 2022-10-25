@@ -138,7 +138,6 @@
     class:xlCharts={$largeCharts}
     class:charts={!$largeCharts}
   >
-
     <Line
       {format_x_label}
       format_y_label={format_y_label_avg_req_time}
@@ -187,12 +186,11 @@
       </svelte:fragment>
     </Line>
 
-  {#if used_tree_data}
-    <TreeMap data={used_tree_data}>
-      <h5 slot="title">Tensor Ops TreeMap</h5>
-    </TreeMap>
-  {/if}
-
+    {#if used_tree_data}
+      <TreeMap data={used_tree_data}>
+        <h5 slot="title">Tensor Ops TreeMap</h5>
+      </TreeMap>
+    {/if}
   </div>
 
   <!-- TODO: snapshot store works, but need to implement UI && test

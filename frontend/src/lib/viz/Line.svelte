@@ -33,13 +33,14 @@
   $: colors = genColors(Object.keys(data).length);
   $: Object.values(data).forEach((d, i) => {
     if (i === 0) all_data = [];
-    d.forEach((v) => {
-      all_data.push(v);
-      if (v.x < x1) x1 = v.x;
-      if (v.x > x2) x2 = v.x;
-      if (v.y < y1) y1 = v.y;
-      if (v.y > y2) y2 = v.y;
-    });
+    if (labels[i].enabled)
+      d.forEach((v) => {
+        all_data.push(v);
+        if (v.x < x1) x1 = v.x;
+        if (v.x > x2) x2 = v.x;
+        if (v.y < y1) y1 = v.y;
+        if (v.y > y2) y2 = v.y;
+      });
   });
 </script>
 
@@ -54,10 +55,13 @@
           <button
             class="inline-flex items-center gap-2"
             class:disabled_label={!labels[i].enabled}
-            on:click={() => (labels[i].enabled = !labels[i].enabled)}
+            on:click={() => {
+              labels[i].enabled = !labels[i].enabled;
+              resetScale();
+            }}
           >
             <div class="badge badge-sm colored_badge" style:--bg_color={color} />
-            <span>{label}</span>
+            <span class="whitespace-nowrap">{label}</span>
           </button>
         {/each}
       </div>
