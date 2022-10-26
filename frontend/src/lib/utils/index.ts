@@ -16,3 +16,47 @@ export const genColors = (n: number) => {
   }
   return colors;
 };
+
+export class LoopTimer {
+  private timer: null | NodeJS.Timer = null;
+  private callback: (...args: any[]) => void;
+  private ms: number;
+  private started = false;
+
+  constructor(callback: (...args: any[]) => void, ms: number) {
+    this.callback = callback;
+    this.ms = ms;
+    this.start();
+  }
+
+  start() {
+    if (!this.started) {
+      this.timer = setInterval(this.callback, this.ms);
+      this.started = true;
+    }
+  }
+
+  stop() {
+    if (this.timer) {
+      clearInterval(this.timer);
+      this.timer = null;
+      this.started = false;
+    }
+  }
+
+  get getStarted(): boolean {
+    return this.started;
+  }
+
+  get interval(): number {
+    return this.ms;
+  }
+
+  setInterval(ms: number) {
+    this.ms = ms;
+    if (this.started) {
+      this.stop();
+      this.start();
+    }
+  }
+}

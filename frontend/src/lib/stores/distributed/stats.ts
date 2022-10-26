@@ -1,5 +1,5 @@
 import { derived, readable, writable } from 'svelte/store';
-import Worker from './worker?worker';
+import Worker from '$lib/worker?worker';
 import { LoadStats } from '$lib/wailsjs/go/main/App';
 import { browser } from '$app/environment';
 import type { TreeMapDatum, TreeMapLastChild } from '$lib/viz/tree/types';
@@ -80,25 +80,32 @@ export const ioStats = readable<ParsedStats[]>([], (set) => {
   if (!browser) return;
   const values: ParsedStats[] = [];
   const worker = new Worker();
+  // tracks # times exponentially backed off query interval
+  let backoff_count = 0;
   worker.onmessage = () => {
     fetchStats()
       .then((data) => {
         const { route_stats } = data;
         if (Object.keys(route_stats).length) {
-          const { route_stats: old_stats } = values[values.length - 1];
-          for (const [key, stats] of Object.entries(route_stats)) {
-            if (old_stats[key] && stats.hits < old_stats[key].hits) {
-              values.splice(0);
-              treeMapDatum.set({});
-              for (const [key, value] of Object.entries(route_stats)) {
-                updateTreeMap(value, key);
+          if (backoff_count > 0) {
+            worker.postMessage({ type: 'decrement_interval' });
+            backoff_count--;
+          }
+          if (values.length) {
+            const { route_stats: old_stats } = values[values.length - 1];
+            for (const [key, stats] of Object.entries(route_stats)) {
+              if (old_stats[key] && stats.hits < old_stats[key].hits) {
+                values.splice(0);
+                treeMapDatum.set({});
+                for (const [key, value] of Object.entries(route_stats)) {
+                  updateTreeMap(value, key);
+                }
+                get_reset_scales().map((fn) => fn());
+                extents.set({ bounds: [data.timestamp, data.timestamp], isDefault: true });
+                break;
               }
-              get_reset_scales().map((fn) => fn());
-              extents.set({ bounds: [data.timestamp, data.timestamp], isDefault: true });
-              break;
             }
           }
-
           values.push(data);
           extents.update((v) => {
             if (v.isDefault) {
@@ -107,18 +114,31 @@ export const ioStats = readable<ParsedStats[]>([], (set) => {
             return v;
           });
           set(values);
+        } else {
+          worker.postMessage({ type: 'increment_interval' });
+          // incr `backoff_count`
+          backoff_count++;
         }
       })
       .catch((err) => console.error(`Failed to fetch stats`, err));
   };
   fetchStats()
     .then((data) => {
-      values.push(data);
-      extents.update((v) => {
-        v.bounds = [data.timestamp, data.timestamp];
-        return v;
-      });
-      set(values);
+      const { route_stats } = data;
+      if (Object.keys(route_stats).length) {
+        if (backoff_count > 0) {
+          worker.postMessage({ type: 'decrement_interval' });
+          backoff_count--;
+        }
+        values.push(data);
+        extents.update((v) => {
+          v.bounds = [data.timestamp, data.timestamp];
+          return v;
+        });
+        set(values);
+      } else {
+        worker.postMessage({ type: 'increment_interval' });
+      }
     })
     .catch((err) => console.error(`Failed to fetch stats`, err));
 
