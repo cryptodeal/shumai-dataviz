@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { ioStats, tree_map_data, extents } from '$lib/stores/distributed/stats';
+  import { ioStats, reset_scales, tree_map_data, extents } from '$lib/stores/distributed/stats';
   import Line from '$lib/viz/Line.svelte';
   import TreeMap from '$lib/viz/tree/TreeMap.svelte';
   import type { Timer, TreeMapDatum } from '$lib/viz/tree/types';
@@ -10,10 +10,8 @@
   let req_per_sec: Record<string, { x: number; y: number; label?: string }[]> = {};
   let bytes_data: Record<string, { x: number; y: number; label?: string }[]> = {};
 
-  let resetScale1: () => void, resetScale2: () => void, resetScale3: () => void;
-
   let clear: Timer,
-    used_tree_data: TreeMapDatum,
+    used_tree_data: TreeMapDatum | undefined,
     has_tree_data = false,
     // TODO: allow changing interval w range slider input
     interval = 5000;
@@ -39,7 +37,8 @@
     used_tree_data = $tree_map_data;
   }
 
-  const updateTreeData = () => (used_tree_data = $tree_map_data);
+  const updateTreeData = () =>
+    (used_tree_data = Object.keys($tree_map_data).length ? $tree_map_data : undefined);
   $: {
     clearInterval(clear);
     clear = setInterval(updateTreeData, interval);
@@ -51,10 +50,7 @@
       req_per_sec = {};
       bytes_data = {};
       if ($sliderStart !== 0 || $sliderEnd !== 1) {
-        // TODO: a bit hacky
-        resetScale1();
-        resetScale2();
-        resetScale3();
+        $reset_scales.map((fn) => fn());
       }
     }
     const stat = $ioStats[i];
@@ -141,7 +137,6 @@
     <Line
       {format_x_label}
       format_y_label={format_y_label_avg_req_time}
-      bind:resetScale={resetScale2}
       data={req_per_sec}
       hidden={!$isAvgReqTimeVisible}
     >
@@ -157,7 +152,6 @@
     <Line
       {format_x_label}
       format_y_label={format_y_label_bytes}
-      bind:resetScale={resetScale3}
       data={bytes_data}
       hidden={!$isMemVisible}
     >
@@ -173,7 +167,6 @@
     <Line
       {format_x_label}
       format_y_label={format_y_label_hits}
-      bind:resetScale={resetScale1}
       data={parsed_stats}
       hidden={!$isHitsVisible}
     >

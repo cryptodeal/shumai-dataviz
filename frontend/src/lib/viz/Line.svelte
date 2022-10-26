@@ -3,12 +3,8 @@
   import { genColors } from '$lib/utils';
   import ChartWrapper from '$lib/ux/ChartWrapper.svelte';
   import RangeSlider from './RangeSlider.svelte';
-  export const resetScale = () => {
-    x1 = Infinity;
-    x2 = -Infinity;
-    y1 = Infinity;
-    y2 = -Infinity;
-  };
+  import { reset_scales } from '$lib/stores/distributed/stats';
+
   export let data: Record<
     string,
     ({ x: number; y: number; label?: string } & Record<string, string | number>)[]
@@ -16,6 +12,15 @@
   export let format_x_label: (x: number) => string;
   export let format_y_label: (y: number) => string;
   export let hidden = false;
+
+  const resetScale = () => {
+    x1 = Infinity;
+    x2 = -Infinity;
+    y1 = Infinity;
+    y2 = -Infinity;
+  };
+
+  $reset_scales.push(resetScale);
 
   let closest: { x: number; y: number; label?: string } & Record<string, string | number>,
     x1 = Infinity,

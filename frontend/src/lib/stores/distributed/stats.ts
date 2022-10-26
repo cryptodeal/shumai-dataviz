@@ -35,7 +35,6 @@ export const getSelectedExtents = () => {
 export const deepEquals = (a: ParsedStats, b: ParsedStats) => {
   for (const [key, value] of Object.entries(a)) {
     if (key === 'timestamp') continue;
-
     switch (typeof value) {
       case 'object':
         // handle `typeof null === 'object'`
@@ -65,6 +64,16 @@ export const deepEquals = (a: ParsedStats, b: ParsedStats) => {
         throw new Error(`Unexpected type: ${typeof value} @ key: ${key}`);
     }
   }
+  return true;
+};
+
+export const reset_scales = writable<Array<() => void>>([]);
+export const get_reset_scales = () => {
+  let res: Array<() => void> = [];
+  reset_scales.subscribe((val) => {
+    res = val;
+  });
+  return res;
 };
 
 export const ioStats = readable<ParsedStats[]>([], (set) => {
@@ -74,14 +83,31 @@ export const ioStats = readable<ParsedStats[]>([], (set) => {
   worker.onmessage = () => {
     fetchStats()
       .then((data) => {
-        values.push(data);
-        extents.update((v) => {
-          if (v.isDefault) {
-            v.bounds[1] = data.timestamp;
+        const { route_stats } = data;
+        if (Object.keys(route_stats).length) {
+          const { route_stats: old_stats } = values[values.length - 1];
+          for (const [key, stats] of Object.entries(route_stats)) {
+            if (old_stats[key] && stats.hits < old_stats[key].hits) {
+              values.splice(0);
+              treeMapDatum.set({});
+              for (const [key, value] of Object.entries(route_stats)) {
+                updateTreeMap(value, key);
+              }
+              get_reset_scales().map((fn) => fn());
+              extents.set({ bounds: [data.timestamp, data.timestamp], isDefault: true });
+              break;
+            }
           }
-          return v;
-        });
-        set(values);
+
+          values.push(data);
+          extents.update((v) => {
+            if (v.isDefault) {
+              v.bounds[1] = data.timestamp;
+            }
+            return v;
+          });
+          set(values);
+        }
       })
       .catch((err) => console.error(`Failed to fetch stats`, err));
   };
@@ -112,6 +138,12 @@ export const getHostURI = () => {
   return host_uri;
 };
 
+/**
+ * in order to filter based on selected bounds,
+ * we need to recalculate/set the values of `treeMapDatum`
+ * any time user changes/resets bounds; we can optimize by
+ * doing the min calc based on type of change/reset scenario.
+ */
 export const treeMapDatum = writable<
   Record<string, Record<string, { time: number; bytes: number }>>
 >({});
